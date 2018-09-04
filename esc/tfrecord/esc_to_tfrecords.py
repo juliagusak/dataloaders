@@ -28,7 +28,7 @@ def write_tfrecords(tfrecord_path, sounds, labels, fs = 16000):
 
 def create_tfrecords(npz_path, tfrecord_pathes,
                      split = 4, fs = 16000,
-                     augment = False, strong = False):
+                     augment_factor = 0, strong = False):
 # tfrecord_pathes = pathes for train, val tfrecords    
     with np.load(npz_path) as dataset:
 
@@ -51,11 +51,11 @@ def create_tfrecords(npz_path, tfrecord_pathes,
 #             print(len(sounds), len(labels))            
                 
             print('Augmenting data...')
-            if augment:
+            if augment_factor:
                 augmented_sounds, augmented_labels = [], []
                 for sound, label in zip(sounds, labels):
-                    augmented_sounds.extend([U.augment_sound(sound, strong = strong) for _ in range(9)])
-                    augmented_labels.extend([label]*9)
+                    augmented_sounds.extend([U.augment_sound(sound, strong = strong) for _ in range(augment_factor)])
+                    augmented_labels.extend([label]*augment_factor)
                     
                 sounds.extend(augmented_sounds)
                 labels.extend(augmented_labels)                    
@@ -81,7 +81,7 @@ def create_tfrecords(npz_path, tfrecord_pathes,
 if __name__ == "__main__":
     FS = 16000
     SPLIT = 4
-    AUGMENT = True
+    AUGMENT = 9
     STRONG = True
     
     esc_path = '/workspace/data/ESC/esc10/'
@@ -93,4 +93,4 @@ if __name__ == "__main__":
     
     create_tfrecords(npz_path, tfrecord_pathes,
                      split = SPLIT, fs = FS,
-                     augment = AUGMENT, strong = STRONG)
+                     augment_factor = AUGMENT, strong = STRONG)
