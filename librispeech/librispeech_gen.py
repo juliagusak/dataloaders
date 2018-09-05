@@ -9,7 +9,7 @@ from glob import glob
 from tqdm import tqdm
 from random import shuffle
 
-LIBRI_SPEECH_URL = "http://cn-mirror.openslr.org/resources/12"
+LIBRI_SPEECH_URL = "http://www.openslr.org/12/"
 EXTRACTED_FOLDER = "LibriSpeech"
 
 
@@ -17,8 +17,12 @@ def parse_args():
     parser = argparse.ArgumentParser(description='LibriSpeech')
 
     # General settings
-    parser.add_argument('--dataset', required=True, help="The name of a particular dataset \
-                                                          from http://www.openslr.org/12/")
+    parser.add_argument('--dataset',
+                        required=True,
+                        help="The name of a particular dataset from {}".format(LIBRI_SPEECH_URL))
+    parser.add_argument('--url',
+                        default=LIBRI_SPEECH_URL,
+                        help="Where datasets are stored. Default: {}".format(LIBRI_SPEECH_URL))
     parser.add_argument('--path', required=True, help="Where to store results")
     parser.add_argument('--force_download', default=False, help="Force downloading from website.")
     parser.add_argument('--force_extraction', default=False, help="Forcing extraction from tar.gz file.")
@@ -36,7 +40,7 @@ if __name__=="__main__":
     opt = parse_args()
 
     # Download tar
-    data_url = os.path.join(LIBRI_SPEECH_URL, opt.dataset)
+    data_url = os.path.join(opt.url, opt.dataset)
     tar_path = os.path.join(opt.path, opt.dataset)
     extraction_path = os.path.join(opt.path, EXTRACTED_FOLDER, opt.dataset[:-7])
     wav_path = os.path.join(opt.path, opt.dataset[:-7] + "_wav" + str(opt.sr // 1000))
