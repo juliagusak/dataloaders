@@ -9,7 +9,7 @@ from glob import glob
 from tqdm import tqdm
 from random import shuffle
 
-from mics import UTTERANCE, CHAPTER, SPEAKER, SOUND
+from utils import UTTERANCE, CHAPTER, SPEAKER, SOUND
 
 LIBRI_SPEECH_URL = "http://www.openslr.org/12/"
 EXTRACTED_FOLDER = "LibriSpeech"
