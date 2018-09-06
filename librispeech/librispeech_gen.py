@@ -9,6 +9,8 @@ from glob import glob
 from tqdm import tqdm
 from random import shuffle
 
+from mics import UTTERANCE, CHAPTER, SPEAKER, SOUND
+
 LIBRI_SPEECH_URL = "http://www.openslr.org/12/"
 EXTRACTED_FOLDER = "LibriSpeech"
 
@@ -109,11 +111,11 @@ if __name__=="__main__":
         data_len = len(wav_files)
         f = h5py.File(dataset_path, 'w')
 
-        dt = h5py.special_dtype(vlen=np.int16)
-        sound = f.create_dataset("sound", (data_len, ), dtype=dt)
-        speaker = f.create_dataset("speaker", (data_len,))
-        chapter = f.create_dataset("chapter", (data_len,))
-        utterance = f.create_dataset("utterance", (data_len,))
+        dt = h5py.special_dtype(vlen=np.float32)
+        sound = f.create_dataset(SOUND, (data_len, ), dtype=dt)
+        speaker = f.create_dataset(SPEAKER, (data_len,), dtype=np.int)
+        chapter = f.create_dataset(CHAPTER, (data_len,), dtype=np.int)
+        utterance = f.create_dataset(UTTERANCE, (data_len,), dtype=np.int)
 
         for i, wav_file in tqdm(enumerate(wav_files), total=data_len):
             file_name = wav_file.split("/")[-1][:-4]

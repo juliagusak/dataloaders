@@ -3,7 +3,7 @@ import torch
 
 from PIL import Image
 
-IMG = 'img'
+FEATURES = 'features'
 LABEL = 'label'
 
 MAX_INT = 32768.0

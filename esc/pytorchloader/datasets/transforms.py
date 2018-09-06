@@ -2,7 +2,7 @@ import torch
 import torchvision.transforms
 
 from torchvision.transforms import TenCrop, Pad, RandomCrop, ToTensor, ToPILImage, Lambda
-from .utils import IMG, LABEL, MAX_INT
+from mics.utils import FEATURES, LABEL, MAX_INT
 
 
 class Centring(object):
@@ -18,11 +18,11 @@ class ConvertToTuple(object):
         self.transform = transform
 
     def __call__(self, sample):
-        img, label = sample[IMG], sample[LABEL]
-        return {IMG: self.transform(img), LABEL: label}
+        img, label = sample[FEATURES], sample[LABEL]
+        return {FEATURES: self.transform(img), LABEL: label}
 
 
-def get_train_transform(length = None):
+def get_train_transform(length=None):
     transforms = [ToPILImage(),
                   Pad((length // 2, 0)),
                   RandomCrop((1, length)),
