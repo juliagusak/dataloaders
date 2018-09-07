@@ -41,12 +41,14 @@ class LibriSpeechH5py(data.Dataset):
         self.precision = precision
 
         self.hpy_file = None
-        with h5py.File(dataset_path, 'r') as f:
-            if self.in_memory:
-                self.sound = f[SOUND][:10]
-            else:
-                self.sound = f[SOUND]
-            self.speaker, self.chapter, self.utterance = f[SPEAKER][:10], f[CHAPTER][:10], f[UTTERANCE][:10]
+        f = h5py.File(dataset_path, 'r')
+        self.speaker, self.chapter, self.utterance = f[SPEAKER][:], f[CHAPTER][:], f[UTTERANCE][:]
+        if self.in_memory:
+            self.sound = f[SOUND][:]
+            f.close()
+        else:
+            self.hpy_file = f
+            self.sound = f[SOUND]
 
         self.n = self.speaker.shape[0]
 
@@ -69,6 +71,10 @@ class LibriSpeechH5py(data.Dataset):
             self.utterance_encoder = LabelsToOneHot(self.utterance)
         else:
             self.utterance_encoder = None
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.hpy_file is not None:
+            self.hpy_file.close()
 
     def __do_transform(self, sound):
         if self.transforms:
@@ -99,13 +105,14 @@ class LibriSpeechH5py(data.Dataset):
 
 
 if __name__ == "__main__":
-    from librispeech.transforms import get_train_transform
+    from mics.transforms import get_train_transform
 
     train_transforms = get_train_transform(length=2 ** 14)
     dataset = LibriSpeechH5py("./librispeach/train-clean-100.hdf5",
                               transforms=train_transforms,
                               sr=16000,
-                              one_hot_utterance=True)
+                              one_hot_utterance=True,
+                              in_memory=False)
     print("Dataset Len", len(dataset))
     print("item 0", dataset[0])
 

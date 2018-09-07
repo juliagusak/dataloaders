@@ -14,14 +14,15 @@ class LibriSpeechH5pyTestDataLoader(DataLoader):
 
 
 if __name__ == "__main__":
-    from librispeech.transforms import get_test_transform
+    from mics.transforms import get_test_transform
     from librispeech.h5py_reader import LibriSpeechH5py
 
     test_transforms = get_test_transform(length=2 ** 14)
     test_dataset = LibriSpeechH5py("./librispeach/train-clean-100.hdf5",
                                    transforms=test_transforms,
                                    sr=16000,
-                                   one_hot_utterance=True)
+                                   one_hot_utterance=True,
+                                   in_memory=False)
     params = {'batch_size': 64,
               'shuffle': True,
               'num_workers': 1}

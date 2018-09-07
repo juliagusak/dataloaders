@@ -3,12 +3,11 @@ import numpy as np
 
 from torch.utils import data
 
-from .transforms import get_train_transform, get_test_transform
-
+from mics.transforms import get_train_transform, get_test_transform
 from mics.utils import FEATURES, LABEL, numpy_one_hot, mix, tensor_to_numpy
 
 
-class BCDatasets(data.Dataset):
+class ESCDatasets(data.Dataset):
     def __init__(self, data_path, dataset_name,
                  sr, exclude,
                  is_train=True,
@@ -45,18 +44,12 @@ class BCDatasets(data.Dataset):
         'Denotes the total number of samples'
         return len(self.y)
 
-    def __do_transform(self, x, y):
-        # __do_transform operates with 1d signals
-        y = numpy_one_hot(y, num_classes=self.n_classes)
-
-        x = x.astype(self.precision)
-        sample = {FEATURES: x, LABEL: y}
+    def __do_transform(self, signal):
+        signal = signal.astype(self.precision)
         if self.transform:
-            sample[FEATURES] = sample[FEATURES].reshape((1, -1, 1))
-            sample = self.transform(sample)
-            sample[FEATURES] = tensor_to_numpy(sample[FEATURES])
+            signal = tensor_to_numpy(self.transform(signal.reshape((1, -1, 1))))
 
-        return sample
+        return signal
 
     def __mix_samples(self, sample1, sample2):
         r = np.random.uniform()
@@ -73,15 +66,16 @@ class BCDatasets(data.Dataset):
         if self.mix:
             idx1, idx2 = np.random.choice(len(self), 2, replace=False)
 
-            sound1, label1 = self.X[idx1], self.y[idx1]
-            sound2, label2 = self.X[idx2], self.y[idx2]
-
-            sample1 = self.__do_transform(sound1, label1)
-            sample2 = self.__do_transform(sound2, label2)
+            sample1 = {FEATURES: self.__do_transform(self.X[idx1]),
+                       LABEL: numpy_one_hot(self.y[idx1], num_classes=self.n_classes)}
+            sample2 = {FEATURES: self.__do_transform(self.X[idx2]),
+                       LABEL: numpy_one_hot(self.y[idx2], num_classes=self.n_classes)}
 
             sample = self.__mix_samples(sample1, sample2)
+
         else:
-            sample = self.__do_transform(self.X[index], self.y[index])
+            sample = {FEATURES: self.__do_transform(self.X[index]),
+                      LABEL: self.y[index]}
 
         return sample
 
