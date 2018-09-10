@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 
 from librispeech.basic_reader import LibriSpeechBasic
+from mics.transforms import get_train_transform
 from mics.utils import LabelsToOneHot
 
 
@@ -69,16 +70,20 @@ class LibriSpeechTFRecord(LibriSpeechBasic):
             self.sess = tf.Session()
             self.n = 0
             iter = self.dataset.make_one_shot_iterator()
-            for _ in self.itarate_over_tfrecord(iter):
+            for sound, sr, speaker, label in self.itarate_over_tfrecord(iter):
+                self.speaker.append(speaker)
+                self.label.append(label)
                 self.n += 1
+            self.speaker = np.array(self.speaker)
+            self.label = np.array(self.label)
 
         self.one_hot_speaker = one_hot_speaker
         self.one_hot_label = one_hot_label
 
         if self.one_hot_speaker or self.one_hot_all:
-            self.label_encoder = LabelsToOneHot(self.speaker)
+            self.speaker_encoder = LabelsToOneHot(self.speaker)
         else:
-            self.label_encoder = None
+            self.speaker_encoder = None
 
         if self.one_hot_label or self.one_hot_all:
             self.label_encoder = LabelsToOneHot(self.label)
@@ -106,25 +111,32 @@ class LibriSpeechTFRecord(LibriSpeechBasic):
         dataset = dataset.shuffle(buffer_size=buffer_size)
         return dataset.repeat(repeat)
 
-    def __len__(self):
-        return self.n
-
     def __getitem__(self, index):
         if self.in_memory:
-            return {"sound": self.sound[index], "sr": self.sr[index],
-                    "speaker": self.speaker[index], "label": self.label[index]}
+            result = {"sound": self.sound[index], "sr": self.sr[index],
+                      "speaker": self.speaker[index], "label": self.label[index]}
         else:
             if self.iterator is None:
                 self.iterator = self.dataset.make_one_shot_iterator()
-
             try:
                 sound, sr, speaker, label = self.sess.run(self.iterator.get_next())
-                return {"sound": sound, "sr": sr, "speaker": speaker, "label": label}
+                result = {"sound": sound, "sr": sr, "speaker": speaker, "label": label}
             except tf.errors.OutOfRangeError:
-                self.iterator = None
+                self.iterator = self.dataset.make_one_shot_iterator()
+                sound, sr, speaker, label = self.sess.run(self.iterator.get_next())
+                result = {"sound": sound, "sr": sr, "speaker": speaker, "label": label}
+
+        result["sound"] = self.do_transform(result["sound"])
+        if self.one_hot_all or self.one_hot_speaker:
+            result["speaker"] = self.do_one_hot(result["speaker"], self.speaker_encoder)
+        if self.one_hot_all or self.one_hot_label:
+            result["label"] = self.do_one_hot(result["label"], self.label_encoder)
+
+        return result
 
 
 if __name__ == "__main__":
-    dataset = LibriSpeechTFRecord("../librispeach/train-clean-100_wav16.tfrecord", None, 16000, in_memory=False)
-    print(dataset[3])
+    dataset = LibriSpeechTFRecord("../librispeach/train-clean-100_wav16.tfrecord",
+                                  get_train_transform(16000), 16000, in_memory=False)
+    print(dataset[3]['sound'].shape)
     print(len(dataset))

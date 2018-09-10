@@ -23,14 +23,14 @@ class LibriSpeechBasic(data.Dataset):
 
         self.one_hot_all = one_hot_all
 
-    def __do_transform(self, sound):
+    def do_transform(self, sound):
         if self.transforms:
             trans_sig = self.transforms(sound.reshape((1, -1, 1)))
             sound = tensor_to_numpy(trans_sig)
 
         return sound
 
-    def __do_one_hot(self, id, encoder):
+    def do_one_hot(self, id, encoder):
         return encoder(np.array([id]).reshape((-1, 1))).toarray()[0, :]
 
     def __len__(self):

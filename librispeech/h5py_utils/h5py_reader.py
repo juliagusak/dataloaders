@@ -61,14 +61,14 @@ class LibriSpeechH5py(LibriSpeechBasic):
     def __getitem__(self, index):
         sound, speaker, chapter, utterance = self.sound[index], self.speaker[index], \
                                              self.chapter[index], self.utterance[index]
-        sound = self.__do_transform(sound)
+        sound = self.do_transform(sound)
 
         if self.one_hot_speaker or self.one_hot_all:
-            speaker = self.__do_one_hot(speaker, self.label_encoder)
+            speaker = self.do_one_hot(speaker, self.label_encoder)
         if self.one_hot_chapter or self.one_hot_all:
-            chapter = self.__do_one_hot(chapter, self.chapter_encoder)
+            chapter = self.do_one_hot(chapter, self.chapter_encoder)
         if self.one_hot_utterance or self.one_hot_all:
-            utterance = self.__do_one_hot(utterance, self.utterance_encoder)
+            utterance = self.do_one_hot(utterance, self.utterance_encoder)
 
         return {"sound": sound, "speaker": speaker, "chapter": chapter, 'utterance': utterance}
 
