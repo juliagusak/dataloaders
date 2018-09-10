@@ -1,7 +1,10 @@
+import torch
+
 import numpy as np
 import tensorflow as tf
 
 from librispeech.basic_reader import LibriSpeechBasic
+from librispeech.data_loader import LibriSpeechH5pyTestDataLoader
 from mics.transforms import get_train_transform
 from mics.utils import LabelsToOneHot
 
@@ -37,7 +40,7 @@ class LibriSpeechTFRecord(LibriSpeechBasic):
                  in_memory=True,
                  batch_size=1,
                  repeat=1,
-                 buffer_size=50):
+                 buffer_size=10):
         super(LibriSpeechTFRecord, self).__init__(transforms, sr, signal_length, precision, one_hot_all, in_memory)
 
         self.sound = []
@@ -71,8 +74,8 @@ class LibriSpeechTFRecord(LibriSpeechBasic):
             self.n = 0
             iter = self.dataset.make_one_shot_iterator()
             for sound, sr, speaker, label in self.itarate_over_tfrecord(iter):
-                self.speaker.append(speaker)
-                self.label.append(label)
+                self.speaker.append(speaker[0])
+                self.label.append(label[0])
                 self.n += 1
             self.speaker = np.array(self.speaker)
             self.label = np.array(self.label)
@@ -96,10 +99,10 @@ class LibriSpeechTFRecord(LibriSpeechBasic):
 
     def itarate_over_tfrecord(self, iter):
         with tf.Session() as sess:
+            i = 0
             try:
-                i = 0
                 while True and i < 10:
-                    i += 1
+                    i+=1
                     yield sess.run(iter.get_next())
             except tf.errors.OutOfRangeError:
                 pass
@@ -112,6 +115,9 @@ class LibriSpeechTFRecord(LibriSpeechBasic):
         return dataset.repeat(repeat)
 
     def __getitem__(self, index):
+        if index >= self.n:
+            raise IndexError
+
         if self.in_memory:
             result = {"sound": self.sound[index], "sr": self.sr[index],
                       "speaker": self.speaker[index], "label": self.label[index]}
@@ -119,7 +125,8 @@ class LibriSpeechTFRecord(LibriSpeechBasic):
             if self.iterator is None:
                 self.iterator = self.dataset.make_one_shot_iterator()
             try:
-                sound, sr, speaker, label = self.sess.run(self.iterator.get_next())
+                sound, sr, speaker, label = self.iterator.get_next()
+                sound, sr, speaker, label = self.sess.run([sound, sr, speaker, label])
                 result = {"sound": sound, "sr": sr, "speaker": speaker, "label": label}
             except tf.errors.OutOfRangeError:
                 self.iterator = self.dataset.make_one_shot_iterator()
@@ -140,3 +147,20 @@ if __name__ == "__main__":
                                   get_train_transform(16000), 16000, in_memory=False)
     print(dataset[3]['sound'].shape)
     print(len(dataset))
+    i = 0
+    for _ in dataset:
+        i += 1
+
+    print(i)
+
+    params = {'batch_size': 64,
+                  'shuffle': False,
+                  'num_workers': 1}
+
+    dataset = LibriSpeechTFRecord("../librispeach/train-clean-100_wav16.tfrecord",
+                                  get_train_transform(16000), 16000, in_memory=True)
+    test_generator = torch.data.DataLoader(dataset, **params)
+    for batch in test_generator:
+        print(batch['sound'].shape)
+        print(batch)
+        break
