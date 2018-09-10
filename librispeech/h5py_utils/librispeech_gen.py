@@ -29,11 +29,11 @@ def parse_args():
     parser.add_argument('--force_download', default=False, help="Force downloading from website.")
     parser.add_argument('--force_extraction', default=False, help="Forcing extraction from tar.gz file.")
     parser.add_argument('--force_convert', default=False, help="Forcing convertation to wav")
-    parser.add_argument('--force_h5py', default=False, help="Forcing storing to h5py")
+    parser.add_argument('--force_h5py', default=False, help="Forcing storing to h5py_utils")
     parser.add_argument('--sr', default=16000,  help="Sample rate for wav. Default is 16kHz")
     parser.add_argument('--wav_dir', default=EXTRACTED_FOLDER+"Wav",  help="Where to store wav files")
     parser.add_argument('--rm_flac', default=True, help="Remove or not folder with flac files")
-    parser.add_argument('--take_random', default=None, type=int, help="Take N random wav files for storing in h5py")
+    parser.add_argument('--take_random', default=None, type=int, help="Take N random wav files for storing in h5py_utils")
 
     return parser.parse_args()
 
@@ -49,7 +49,7 @@ if __name__=="__main__":
     dataset_path = os.path.join(opt.path, opt.dataset[:-7])+'.hdf5'
 
     if opt.force_h5py:
-        print("Force h5py creation. {} file will me replaced.".format(dataset_path))
+        print("Force h5py_utils creation. {} file will me replaced.".format(dataset_path))
         subprocess.run("rm -rf {}".format(dataset_path), shell=True, check=True)
 
     if os.path.exists(dataset_path) and not (opt.force_download or opt.force_extraction or opt.force_convert):

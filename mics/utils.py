@@ -2,6 +2,7 @@ import numpy as np
 import torch
 
 from PIL import Image
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 FEATURES = 'features'
 LABEL = 'label'
@@ -9,6 +10,18 @@ LABEL = 'label'
 MAX_INT = 32768.0
 
 Image.MAX_IMAGE_PIXELS = None
+
+
+class LabelsToOneHot:
+    def __init__(self, data):
+        self.labels_encoder = LabelEncoder()
+        self.one_hot_encoder = OneHotEncoder()
+
+        self.labels_encoder.fit(data.reshape(-1, ))
+        self.one_hot_encoder.fit(self.labels_encoder.transform(data.reshape(-1, )).reshape((-1, 1)))
+
+    def __call__(self, data):
+        return self.one_hot_encoder.transform(self.labels_encoder.transform(data.reshape(-1, )).reshape((-1, 1)))
 
 
 def tensor_to_numpy(tensor):
@@ -75,3 +88,4 @@ def mix(sound1, sound2, r, fs):
     sound = ((sound1 * t + sound2 * (1 - t)) / np.sqrt(t ** 2 + (1 - t) ** 2))
 
     return sound
+
