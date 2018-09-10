@@ -15,7 +15,7 @@ Pytorch and TFRecords data loaders for  several audio datasets
   - [ ] Pytorch loader
   - [ ] TFRecords loader
 5. [GTZAN](http://marsyasweb.appspot.com/download/data_sets/) - audio tracks from a variety of sources annotated with genre class
-  - [ ] Pytorch loader
+  - [x] Pytorch loader
   - [ ] TFRecords loader
 
   
