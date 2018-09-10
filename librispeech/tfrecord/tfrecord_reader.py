@@ -99,10 +99,8 @@ class LibriSpeechTFRecord(LibriSpeechBasic):
 
     def itarate_over_tfrecord(self, iter):
         with tf.Session() as sess:
-            i = 0
             try:
-                while True and i < 10:
-                    i+=1
+                while True:
                     yield sess.run(iter.get_next())
             except tf.errors.OutOfRangeError:
                 pass
@@ -143,7 +141,7 @@ class LibriSpeechTFRecord(LibriSpeechBasic):
 
 
 if __name__ == "__main__":
-    dataset = LibriSpeechTFRecord("../librispeach/train-clean-100_wav16.tfrecord",
+    dataset = LibriSpeechTFRecord("../librispeach/test-clean-100_wav16.tfrecord",
                                   get_train_transform(16000), 16000, in_memory=False)
     print(dataset[3]['sound'].shape)
     print(len(dataset))
@@ -157,9 +155,9 @@ if __name__ == "__main__":
                   'shuffle': False,
                   'num_workers': 1}
 
-    dataset = LibriSpeechTFRecord("../librispeach/train-clean-100_wav16.tfrecord",
-                                  get_train_transform(16000), 16000, in_memory=True)
-    test_generator = torch.data.DataLoader(dataset, **params)
+    dataset = LibriSpeechTFRecord("../librispeach/test-clean-100_wav16.tfrecord",
+                                  get_train_transform(16000), 16000, in_memory=False)
+    test_generator = LibriSpeechH5pyTestDataLoader(dataset, **params)
     for batch in test_generator:
         print(batch['sound'].shape)
         print(batch)
