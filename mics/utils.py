@@ -24,6 +24,15 @@ class LabelsToOneHot:
         return self.one_hot_encoder.transform(self.labels_encoder.transform(data.reshape(-1, )).reshape((-1, 1)))
 
 
+class LabelsEncoder:
+    def __init__(self, data):
+        self.labels_encoder = LabelEncoder()
+        self.labels_encoder.fit(data.reshape(-1, ))
+
+    def __call__(self, data):
+        return self.labels_encoder.transform(data.reshape(-1, ))
+
+
 def tensor_to_numpy(tensor):
     if torch.cuda.is_available():
         return tensor.cpu().numpy()

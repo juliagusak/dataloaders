@@ -12,6 +12,7 @@ class LibriSpeechBasic(data.Dataset):
                  signal_length=2 ** 16,
                  precision=np.float32,
                  one_hot_all=False,
+                 encode_cat=False,
                  in_memory=True):
         self.in_memory = in_memory
         self.transforms = transforms
@@ -22,15 +23,16 @@ class LibriSpeechBasic(data.Dataset):
         self.n = None
 
         self.one_hot_all = one_hot_all
+        self.encode_cat = encode_cat
 
-    def __do_transform(self, sound):
+    def do_transform(self, sound):
         if self.transforms:
             trans_sig = self.transforms(sound.reshape((1, -1, 1)))
             sound = tensor_to_numpy(trans_sig)
 
         return sound
 
-    def __do_one_hot(self, id, encoder):
+    def do_one_hot(self, id, encoder):
         return encoder(np.array([id]).reshape((-1, 1))).toarray()[0, :]
 
     def __len__(self):
