@@ -11,7 +11,7 @@ from mics.utils import FEATURES, LABEL, numpy_one_hot, mix, tensor_to_numpy,Labe
 class GTZAN(data.Dataset):
     def __init__(self,
                  root_dir,
-                 sr = 16000,
+                 sr = 22050,
                  precision = np.float32,
                  is_train = True,
                  seed = 42,
@@ -63,7 +63,7 @@ class GTZAN(data.Dataset):
         return signal
     
     def __getitem__(self, index):
-        y_enc = self.le(np.array(self.y[index]))[0]
+        y_enc = self.le(np.array(self.y[index]).reshape((-1, 1))).toarray()[0, :]
         X_trans = self.__do_transform(self.X[index])
         sample = {FEATURES: X_trans , LABEL: y_enc}
         return sample
