@@ -5,7 +5,7 @@ import numpy as np
 from torch.utils import data
 
 from librispeech.basic_reader import LibriSpeechBasic
-from mics.utils import LabelsToOneHot
+from mics.utils import LabelsToOneHot, LabelsEncoder
 from librispeech.h5py_utils.utils import SPEAKER, SOUND, CHAPTER, UTTERANCE
 
 
@@ -20,8 +20,10 @@ class LibriSpeechH5py(LibriSpeechBasic):
                  one_hot_speaker=False,
                  one_hot_chapter=False,
                  one_hot_utterance=False,
+                 encode_cat=False,
                  in_memory=True):
-        super(LibriSpeechH5py, self).__init__(transforms, sr, signal_length, precision, one_hot_all, in_memory)
+        super(LibriSpeechH5py, self).__init__(transforms, sr, signal_length, precision,
+                                              one_hot_all, encode_cat, in_memory)
 
         self.hpy_file = None
         f = h5py.File(dataset_path, 'r')
@@ -39,20 +41,51 @@ class LibriSpeechH5py(LibriSpeechBasic):
         self.one_hot_chapter = one_hot_chapter
         self.one_hot_utterance = one_hot_utterance
 
-        if self.one_hot_speaker or self.one_hot_all:
-            self.label_encoder = LabelsToOneHot(self.speaker)
+        if self.encode_cat:
+            self.speaker_encode = LabelsEncoder(self.speaker)
+            self.chapter_encode = LabelsEncoder(self.chapter)
+            self.utterance_encode = LabelsEncoder(self.utterance)
+
+            self.speaker = self.speaker_encode(self.speaker)
+            self.chapter = self.chapter_encode(self.chapter)
+            self.utterance = self.utterance_encode(self.utterance)
         else:
-            self.label_encoder = None
+            self.speaker_encode = None
+            self.chapter_encode = None
+            self.utterance_encode = None
+
+        if self.one_hot_speaker or self.one_hot_all:
+            self.speaker_one_hot = LabelsToOneHot(self.speaker)
+        else:
+            self.speaker_one_hot = None
 
         if self.one_hot_chapter or self.one_hot_all:
-            self.chapter_encoder = LabelsToOneHot(self.chapter)
+            self.chapter_one_hot = LabelsToOneHot(self.chapter)
         else:
-            self.chapter_encoder = None
+            self.chapter_one_hot = None
 
         if self.one_hot_utterance or self.one_hot_all:
-            self.utterance_encoder = LabelsToOneHot(self.utterance)
+            self.utterance_one_hot = LabelsToOneHot(self.utterance)
         else:
-            self.utterance_encoder = None
+            self.utterance_one_hot = None
+
+    def get_speaker_encode(self):
+        return self.speaker_encode
+
+    def get_chapter_encode(self):
+        return self.chapter_encode
+
+    def get_utterance_encode(self):
+        return self.utterance_encode
+
+    def get_speaker_one_hot(self):
+        return self.speaker_one_hot
+
+    def get_chapter_one_hot(self):
+        return self.chapter_one_hot
+
+    def get_utterance_one_hot(self):
+        return self.utterance_one_hot
 
     def __exit__(self, exc_type, exc_value, traceback):
         if self.hpy_file is not None:
@@ -64,11 +97,11 @@ class LibriSpeechH5py(LibriSpeechBasic):
         sound = self.do_transform(sound)
 
         if self.one_hot_speaker or self.one_hot_all:
-            speaker = self.do_one_hot(speaker, self.label_encoder)
+            speaker = self.do_one_hot(speaker, self.speaker_one_hot)
         if self.one_hot_chapter or self.one_hot_all:
-            chapter = self.do_one_hot(chapter, self.chapter_encoder)
+            chapter = self.do_one_hot(chapter, self.chapter_one_hot)
         if self.one_hot_utterance or self.one_hot_all:
-            utterance = self.do_one_hot(utterance, self.utterance_encoder)
+            utterance = self.do_one_hot(utterance, self.utterance_one_hot)
 
         return {"sound": sound, "speaker": speaker, "chapter": chapter, 'utterance': utterance}
 

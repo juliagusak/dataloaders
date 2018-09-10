@@ -20,9 +20,8 @@ class LibriSpeechTFRecordDataLoader(DataLoader):
             sr.append(elem["sr"])
 
             if (idx + 1) % self.batch_size == 0:
-                batch = {"sound": np.vstack(sound), "speaker": np.hstack(speaker),
-                         "label": np.hstack(label), "sr": np.hstack(sr)}
-                yield batch
+                yield {"sound": np.vstack(sound), "speaker": np.hstack(speaker),
+                       "label": np.hstack(label), "sr": np.hstack(sr)}
 
                 sound.clear()
                 speaker.clear()

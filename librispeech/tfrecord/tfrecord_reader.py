@@ -2,8 +2,7 @@ import numpy as np
 import tensorflow as tf
 
 from librispeech.basic_reader import LibriSpeechBasic
-from mics.transforms import get_train_transform
-from mics.utils import LabelsToOneHot
+from mics.utils import LabelsToOneHot, LabelsEncoder
 
 
 def _extract_features(example):
@@ -34,11 +33,13 @@ class LibriSpeechTFRecord(LibriSpeechBasic):
                  one_hot_all=False,
                  one_hot_speaker=False,
                  one_hot_label=False,
+                 encode_cat=False,
                  in_memory=True,
                  batch_size=1,
                  repeat=1,
                  buffer_size=10):
-        super(LibriSpeechTFRecord, self).__init__(transforms, sr, signal_length, precision, one_hot_all, in_memory)
+        super(LibriSpeechTFRecord, self).__init__(transforms, sr, signal_length, precision,
+                                                  one_hot_all, encode_cat, in_memory)
 
         self.sound = []
         self.speaker = []
@@ -80,19 +81,41 @@ class LibriSpeechTFRecord(LibriSpeechBasic):
         self.one_hot_speaker = one_hot_speaker
         self.one_hot_label = one_hot_label
 
-        if self.one_hot_speaker or self.one_hot_all:
-            self.speaker_encoder = LabelsToOneHot(self.speaker)
+        if self.encode_cat:
+            self.speaker_encoder = LabelsEncoder(self.speaker)
+            self.label_encoder = LabelsEncoder(self.label)
+
+            self.speaker = self.speaker_encoder(self.speaker)
+            self.label = self.label_encoder(self.label)
         else:
             self.speaker_encoder = None
+            self.label_encoder = None
+
+        if self.one_hot_speaker or self.one_hot_all:
+            self.speaker_one_hot = LabelsToOneHot(self.speaker)
+        else:
+            self.speaker_one_hot = None
 
         if self.one_hot_label or self.one_hot_all:
-            self.label_encoder = LabelsToOneHot(self.label)
+            self.label_one_hot = LabelsToOneHot(self.label)
         else:
-            self.label_encoder = None
+            self.label_one_hot = None
 
     def __exit__(self, exc_type, exc_value, traceback):
         if self.sess is not None:
             self.sess.close()
+
+    def get_speaker_encoder(self):
+        return self.speaker_encoder
+
+    def get_label_encoder(self):
+        return self.label_encoder
+
+    def get_speaker_one_hot(self):
+        return self.speaker_one_hot
+
+    def get_label_one_hot(self):
+        return self.label_one_hot
 
     def itarate_over_tfrecord(self, iter):
         with tf.Session() as sess:
@@ -130,16 +153,18 @@ class LibriSpeechTFRecord(LibriSpeechBasic):
 
         result["sound"] = self.do_transform(result["sound"])
         if self.one_hot_all or self.one_hot_speaker:
-            result["speaker"] = self.do_one_hot(result["speaker"], self.speaker_encoder)
+            result["speaker"] = self.do_one_hot(result["speaker"], self.speaker_one_hot)
         if self.one_hot_all or self.one_hot_label:
-            result["label"] = self.do_one_hot(result["label"], self.label_encoder)
+            result["label"] = self.do_one_hot(result["label"], self.label_one_hot)
 
         return result
 
 
 if __name__ == "__main__":
+    from mics.transforms import get_train_transform
+
     dataset = LibriSpeechTFRecord("../librispeach/test-clean-100_wav16.tfrecord",
-                                  get_train_transform(16000), 16000, in_memory=False)
+                                  get_train_transform(16000), 16000, in_memory=False, encode_cat=True)
     print(dataset[3]['sound'].shape)
     print(len(dataset))
     i = 0
