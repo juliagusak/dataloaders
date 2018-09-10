@@ -1,10 +1,7 @@
-import torch
-
 import numpy as np
 import tensorflow as tf
 
 from librispeech.basic_reader import LibriSpeechBasic
-from librispeech.data_loader import LibriSpeechH5pyTestDataLoader
 from mics.transforms import get_train_transform
 from mics.utils import LabelsToOneHot
 
@@ -148,17 +145,4 @@ if __name__ == "__main__":
     i = 0
     for _ in dataset:
         i += 1
-
     print(i)
-
-    params = {'batch_size': 64,
-                  'shuffle': False,
-                  'num_workers': 1}
-
-    dataset = LibriSpeechTFRecord("../librispeach/test-clean-100_wav16.tfrecord",
-                                  get_train_transform(16000), 16000, in_memory=False)
-    test_generator = LibriSpeechH5pyTestDataLoader(dataset, **params)
-    for batch in test_generator:
-        print(batch['sound'].shape)
-        print(batch)
-        break
