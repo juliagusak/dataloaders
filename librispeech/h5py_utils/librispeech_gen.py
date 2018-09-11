@@ -26,14 +26,15 @@ def parse_args():
                         default=LIBRI_SPEECH_URL,
                         help="Where datasets are stored. Default: {}".format(LIBRI_SPEECH_URL))
     parser.add_argument('--path', required=True, help="Where to store results")
-    parser.add_argument('--force_download', default=False, help="Force downloading from website.")
-    parser.add_argument('--force_extraction', default=False, help="Forcing extraction from tar.gz file.")
-    parser.add_argument('--force_convert', default=False, help="Forcing convertation to wav")
-    parser.add_argument('--force_h5py', default=False, help="Forcing storing to h5py_utils")
+    parser.add_argument('--force_download', action='store_true', help="Force downloading from website.")
+    parser.add_argument('--force_extraction', action='store_true', help="Forcing extraction from tar.gz file.")
+    parser.add_argument('--force_convert', action='store_true', help="Forcing convertation to wav")
+    parser.add_argument('--force_h5py', action='store_true', help="Forcing storing to h5py_utils")
     parser.add_argument('--sr', default=16000,  help="Sample rate for wav. Default is 16kHz")
     parser.add_argument('--wav_dir', default=EXTRACTED_FOLDER+"Wav",  help="Where to store wav files")
     parser.add_argument('--rm_flac', default=True, help="Remove or not folder with flac files")
-    parser.add_argument('--take_random', default=None, type=int, help="Take N random wav files for storing in h5py_utils")
+    parser.add_argument('--take_random', action='store_true',
+                        type=int, help="Take N random wav files for storing in h5py_utils")
 
     return parser.parse_args()
 
@@ -58,15 +59,15 @@ if __name__=="__main__":
 
     # rm folders
     if opt.force_download:
-        if opt.force_download:
+        if opt.force_download and os.path.exists(tar_path):
             print("Force download. {} file will me replaced.".format(tar_path))
             os.remove(tar_path)
 
-    if opt.force_extraction:
+    if opt.force_extraction and os.path.exists(extraction_path):
         print("Force extraction. {} file will me replaced.".format(extraction_path))
         subprocess.run("rm -rf {}".format(extraction_path), shell=True, check=True)
 
-    if opt.force_convert:
+    if opt.force_convert and os.path.exists(wav_path):
         print("Force extraction. {} file will me replaced.".format(wav_path))
         subprocess.run("rm -rf {}".format(wav_path), shell=True, check=True)
 
