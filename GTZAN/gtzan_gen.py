@@ -79,7 +79,7 @@ if __name__ == "__main__":
 
     file_names = glob.glob(extracted_path + '/**/*.au')
     shuffle(file_names)
-    file_names = file_names[:100]
+    file_names = file_names
     result = Parallel(n_jobs=opt.n_jobs, verbose=0)(delayed(read_file)(file_name, opt.sr, 1) for file_name in file_names)
     X, y = zip(*result)
 
