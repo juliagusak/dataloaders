@@ -11,11 +11,19 @@ from mics.utils import FEATURES, LABEL, tensor_to_numpy, LabelsToOneHot
 class GTZAN(data.Dataset):
     def __init__(self,
                  root_dir,
+<<<<<<< HEAD:GTZAN/torch/datasets/gtzan.py
                  sr=16000,
                  precision=np.float32,
                  is_train=True,
                  seed=42,
                  n_jobs=8,
+=======
+                 sr = 22050,
+                 precision = np.float32,
+                 is_train = True,
+                 seed = 42,
+                 n_jobs = 8,
+>>>>>>> 6808e8eb50be5961d586c1b36cd42bda8a39930c:GTZAN/pytorchloader/datasets/gtzan.py
                  signal_length=2 ** 16,
                  verbose=0):
         self.root_dir = root_dir
@@ -63,7 +71,7 @@ class GTZAN(data.Dataset):
         return signal
 
     def __getitem__(self, index):
-        y_enc = self.le(np.array(self.y[index]))[0]
+        y_enc = self.le(np.array(self.y[index]).reshape((-1, 1))).toarray()[0, :]
         X_trans = self.__do_transform(self.X[index])
         sample = {FEATURES: X_trans, LABEL: y_enc}
         return sample
