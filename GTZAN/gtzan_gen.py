@@ -2,12 +2,15 @@ import argparse
 import glob
 import os
 import subprocess
+from random import shuffle
 
 import librosa
 import numpy as np
 
 from joblib import Parallel, delayed
 from sklearn.model_selection import train_test_split
+
+from mics.utils import LabelsEncoder
 
 GTZAN_SPEECH_URL = "http://opihi.cs.uvic.ca/sound/genres.tar.gz"
 DEFAULT_BIT_RATE = 22050
@@ -36,8 +39,8 @@ def parse_args():
     return parser.parse_args()
 
 
-def save_npz(X, y, save_to):
-    data = {"X": X, "y": y}
+def save_npz(X, y, z, save_to):
+    data = {"X": X, "y": y, "label_name": z}
     np.savez(save_to, **data)
 
 
@@ -74,31 +77,36 @@ if __name__ == "__main__":
     X = []
     y = []
 
-    file_names = glob.glob(extracted_path + '/**/*.au')[:100]
+    file_names = glob.glob(extracted_path + '/**/*.au')
+    shuffle(file_names)
+    file_names = file_names[:100]
     result = Parallel(n_jobs=opt.n_jobs, verbose=0)(delayed(read_file)(file_name, opt.sr, 1) for file_name in file_names)
     X, y = zip(*result)
 
     X = np.array(X)
     y = np.array(y)
 
+    encoder = LabelsEncoder(y)
+    z = encoder(y)
+
     print("Finish")
 
     if opt.train < 1.0:
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=1-opt.train)
+        X_train, X_test, y_train, y_test, z_train, z_test = train_test_split(X, y, z, test_size=1-opt.train)
     else:
-        X_train, y_train = X, y
+        X_train, y_train, z_train = X, y, z
 
-    save_npz(X_train, y_train,
+    save_npz(X_train, z_train, y_train,
              os.path.join(opt.path, FOLDER_NAME) + "{}_{}".format(int(opt.sr // 1000), TRAIN_SUFFIX))
 
     if opt.train < 1.0:
         if opt.val == 0:
-            save_npz(X_test, y_test,
+            save_npz(X_test, z_test, y_test,
                      os.path.join(opt.path, FOLDER_NAME) + "{}_{}".format(int(opt.sr // 1000), TEST_SUFFIX))
         else:
-            X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=opt.val)
-            save_npz(X_test, y_test,
+            X_test, X_val, y_test, y_val, z_test, z_val = train_test_split(X_test, y_test, z_test, test_size=opt.val)
+            save_npz(X_test, z_test, y_test,
                      os.path.join(opt.path, FOLDER_NAME) + "{}_{}".format(int(opt.sr // 1000), TEST_SUFFIX))
-            save_npz(X_val, y_val,
+            save_npz(X_val, z_val, y_val,
                      os.path.join(opt.path, FOLDER_NAME) + "{}_{}".format(int(opt.sr // 1000), VAL_SUFFIX))
 

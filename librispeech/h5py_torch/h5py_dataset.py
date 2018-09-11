@@ -6,7 +6,7 @@ from torch.utils import data
 
 from librispeech.basic_reader import LibriSpeechBasic
 from mics.utils import LabelsToOneHot, LabelsEncoder
-from librispeech.h5py_utils.utils import SPEAKER, SOUND, CHAPTER, UTTERANCE
+from librispeech.h5py_torch.utils import SPEAKER, SOUND, CHAPTER, UTTERANCE
 
 
 class LibriSpeechH5py(LibriSpeechBasic):
