@@ -22,6 +22,13 @@ class GTANZDataset(data.Dataset):
         else:
             self.one_hot_encoder = None
 
+    def instance_dataset(self, dataset_path, transforms):
+        new_dataset = GTANZDataset(dataset_path, transforms=transforms, one_hot_labels=False)
+        if self.one_hot_labels:
+            new_dataset.one_hot_labels = True
+            new_dataset.one_hot_encoder = self.one_hot_encoder
+        return new_dataset
+
     def __len__(self):
         return self.n
 
