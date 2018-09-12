@@ -5,7 +5,7 @@ import numpy as np
 from mics.basic_dataset import BasicDataset
 from mics.utils import LabelsEncoder, LabelsToOneHot
 from nsynth.constants import *
-from nsynth.torch.basic_dataset import NSynthBasicDataset
+from nsynth.torch_readers.basic_dataset import NSynthBasicDataset
 
 
 class NSynthH5PyDataset(NSynthBasicDataset):

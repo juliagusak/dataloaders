@@ -6,7 +6,7 @@ from torch.utils import data
 
 from mics.basic_dataset import BasicDataset
 from mics.utils import LabelsToOneHot, LabelsEncoder
-from librispeech.torch.utils import SPEAKER, SOUND, CHAPTER, UTTERANCE
+from librispeech.torch_readers.utils import SPEAKER, SOUND, CHAPTER, UTTERANCE
 
 
 class H5PyDataset(BasicDataset):

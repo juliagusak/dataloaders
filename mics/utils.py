@@ -1,4 +1,5 @@
 import numpy as np
+import tensorflow as tf
 import torch
 
 from PIL import Image
@@ -31,6 +32,15 @@ class LabelsEncoder:
 
     def __call__(self, data):
         return self.labels_encoder.transform(data.reshape(-1, ))
+
+
+def itarate_over_tfrecord(iter):
+    with tf.Session() as sess:
+        try:
+            while True:
+                yield sess.run(iter.get_next())
+        except tf.errors.OutOfRangeError:
+            pass
 
 
 def tensor_to_numpy(tensor):
