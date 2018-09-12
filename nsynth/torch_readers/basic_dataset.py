@@ -1,5 +1,3 @@
-import h5py
-
 import numpy as np
 
 from mics.basic_dataset import BasicDataset
@@ -7,7 +5,7 @@ from mics.utils import LabelsEncoder, LabelsToOneHot
 from nsynth.constants import *
 
 
-class NSynthH5PyDataset(BasicDataset):
+class NSynthBasicDataset(BasicDataset):
     def __init__(self,
                  dataset_path,
                  transforms,
@@ -21,28 +19,22 @@ class NSynthH5PyDataset(BasicDataset):
                  one_hot_instr_family=False,
                  encode_cat=False,
                  in_memory=True):
-        super(NSynthH5PyDataset, self).__init__(transforms, sr, signal_length, precision,
-                                                one_hot_all, encode_cat, in_memory)
+        super(NSynthBasicDataset, self).__init__(transforms, sr, signal_length, precision,
+                                                 one_hot_all, encode_cat, in_memory)
         self.one_hot_pitch = one_hot_pitch
         self.one_hot_velocity = one_hot_velocity
         self.one_hot_instr_src = one_hot_instr_src
         self.one_hot_instr_family = one_hot_instr_family
 
         self.hpy_file = None
+        self.audio = None
+        self.pitch = None
+        self.velocity = None
+        self.instr_src = None
+        self.instr_fml = None
+        self.qualities = None
 
-        f = h5py.File(dataset_path, 'r')
-        self.pitch = f[PITCH][:]
-        self.velocity = f[VELOCITY][:]
-        self.instr_src = f[INSTR_SRC][:]
-        self.instr_fml = f[INSTR_FAMILY][:]
-        self.qualities = f[QUALITIES][:]
-
-        if self.in_memory:
-            self.audio = f[AUDIO][:]
-            f.close()
-        else:
-            self.hpy_file = f
-            self.sound = f[AUDIO]
+        self.read_file(dataset_path)
 
         self.n = self.pitch.shape[0]
 
@@ -77,20 +69,35 @@ class NSynthH5PyDataset(BasicDataset):
         else:
             self.instr_fml_one_hot = None
 
+    def read_file(self, dataset_path):
+        pass
+        # f = h5py.File(dataset_path, 'r')
+        # self.pitch = f[PITCH][:]
+        # self.velocity = f[VELOCITY][:]
+        # self.instr_src = f[INSTR_SRC][:]
+        # self.instr_fml = f[INSTR_FAMILY][:]
+        # self.qualities = f[QUALITIES][:]
+        # if self.in_memory:
+        #     self.audio = f[AUDIO][:]
+        #     f.close()
+        # else:
+        #     self.hpy_file = f
+        #     self.audio = f[AUDIO]
+
     def instance_dataset(self, dataset_path, transforms, in_memory):
-        new_dataset = NSynthH5PyDataset(dataset_path,
-                                        transforms,
-                                        sr=self.sr,
-                                        signal_length=self.signal_length,
-                                        precision=self.precision,
-                                        one_hot_all=False,
-                                        one_hot_pitch=False,
-                                        one_hot_velocity=False,
-                                        one_hot_instr_src=False,
-                                        one_hot_instr_family=False,
-                                        encode_cat=False,
-                                        in_memory=in_memory
-                                        )
+        new_dataset = NSynthBasicDataset(dataset_path,
+                                         transforms,
+                                         sr=self.sr,
+                                         signal_length=self.signal_length,
+                                         precision=self.precision,
+                                         one_hot_all=False,
+                                         one_hot_pitch=False,
+                                         one_hot_velocity=False,
+                                         one_hot_instr_src=False,
+                                         one_hot_instr_family=False,
+                                         encode_cat=False,
+                                         in_memory=in_memory
+                                         )
 
         new_dataset.one_hot_all = self.one_hot_all
         if self.one_hot_pitch or self.one_hot_all:
@@ -172,4 +179,3 @@ if __name__ == "__main__":
         print(batch[AUDIO].shape)
         print(batch[PITCH])
         break
-

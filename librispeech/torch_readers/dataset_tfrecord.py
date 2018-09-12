@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 
 from mics.basic_dataset import BasicDataset
-from mics.utils import LabelsToOneHot, LabelsEncoder
+from mics.utils import LabelsToOneHot, LabelsEncoder, itarate_over_tfrecord
 
 
 def _extract_features(example):
@@ -55,7 +55,7 @@ class TFRecordDataset(BasicDataset):
         self.iterator = None
         if self.in_memory:
             iter = self.dataset.make_one_shot_iterator()
-            for sound, sr, speaker, label in self.itarate_over_tfrecord(iter):
+            for sound, sr, speaker, label in itarate_over_tfrecord(iter):
                 self.sound.append(sound)
                 self.sr.append(sr)
                 self.speaker.append(speaker)
@@ -71,7 +71,7 @@ class TFRecordDataset(BasicDataset):
             self.sess = tf.Session()
             self.n = 0
             iter = self.dataset.make_one_shot_iterator()
-            for sound, sr, speaker, label in self.itarate_over_tfrecord(iter):
+            for sound, sr, speaker, label in itarate_over_tfrecord(iter):
                 self.speaker.append(speaker[0])
                 self.label.append(label[0])
                 self.n += 1
@@ -104,26 +104,6 @@ class TFRecordDataset(BasicDataset):
     def __exit__(self, exc_type, exc_value, traceback):
         if self.sess is not None:
             self.sess.close()
-
-    def get_speaker_encoder(self):
-        return self.speaker_encoder
-
-    def get_label_encoder(self):
-        return self.label_encoder
-
-    def get_speaker_one_hot(self):
-        return self.speaker_one_hot
-
-    def get_label_one_hot(self):
-        return self.label_one_hot
-
-    def itarate_over_tfrecord(self, iter):
-        with tf.Session() as sess:
-            try:
-                while True:
-                    yield sess.run(iter.get_next())
-            except tf.errors.OutOfRangeError:
-                pass
 
     def configure_tf_dataset(self, batch_size, buffer_size, dataset_path, repeat):
         dataset = tf.data.TFRecordDataset(dataset_path)
