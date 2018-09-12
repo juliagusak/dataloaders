@@ -1,3 +1,4 @@
+import numpy as np
 from mics.basic_dataset import BasicDataset
 from mics.utils import LabelsToOneHot, LabelsEncoder
 

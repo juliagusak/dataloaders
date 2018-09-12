@@ -2,8 +2,6 @@ import h5py
 
 import numpy as np
 
-from mics.basic_dataset import BasicDataset
-from mics.utils import LabelsEncoder, LabelsToOneHot
 from nsynth.constants import *
 from nsynth.torch_readers.basic_dataset import NSynthBasicDataset
 
@@ -22,7 +20,7 @@ class NSynthH5PyDataset(NSynthBasicDataset):
                  one_hot_instr_family=False,
                  encode_cat=False,
                  in_memory=True):
-        super(NSynthBasicDataset, self).__init__(dataset_path,
+        super(NSynthH5PyDataset, self).__init__(dataset_path,
                                                  transforms,
                                                  sr,
                                                  signal_length=signal_length,
@@ -36,7 +34,6 @@ class NSynthH5PyDataset(NSynthBasicDataset):
                                                  in_memory=in_memory)
 
     def read_file(self, dataset_path):
-        print("!!!!!!!!")
         f = h5py.File(dataset_path, 'r')
         self.pitch = f[PITCH][:]
         self.velocity = f[VELOCITY][:]
