@@ -48,7 +48,7 @@ class LibriSpeechTFRecordTestDataLoader(DataLoader):
 
 if __name__ == "__main__":
     from mics.transforms import get_train_transform, get_test_transform
-    from librispeech.tfrecord.tfrecord_reader import LibriSpeechTFRecord
+    from librispeech.tfrecord.tfrecord_dataset import LibriSpeechTFRecord
 
     params = {'batch_size': 64,
               'shuffle': False,

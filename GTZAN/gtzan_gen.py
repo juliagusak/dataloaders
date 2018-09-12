@@ -57,7 +57,6 @@ if __name__ == "__main__":
     tar_gz_path = os.path.join(opt.path, TAR_FILE)
     extracted_path = os.path.join(opt.path, FOLDER_NAME)
     if not os.path.exists(tar_gz_path) or opt.force_download:
-        pass
         if opt.force_download and os.path.exists(tar_gz_path):
             print("Force download. {} file will me replaced.".format(tar_gz_path))
             os.remove(tar_gz_path)
