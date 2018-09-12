@@ -5,7 +5,7 @@ from torch.utils import data
 from mics.utils import tensor_to_numpy
 
 
-class LibriSpeechBasic(data.Dataset):
+class BasicDataset(data.Dataset):
     def __init__(self,
                  transforms,
                  sr,
@@ -33,7 +33,7 @@ class LibriSpeechBasic(data.Dataset):
         return sound
 
     def do_one_hot(self, id, encoder):
-        return encoder(np.array([id]).reshape((-1, 1))).toarray()[0, :]
+        return encoder(np.array([id]).reshape((-1, 1)))[0, :]
 
     def __len__(self):
         return self.n

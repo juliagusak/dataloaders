@@ -32,7 +32,7 @@ class GTANZDataset(data.Dataset):
             X = tensor_to_numpy(self.transforms(X.reshape((1, -1, 1))))
 
         if self.one_hot_labels:
-            y = self.one_hot_encoder(y).toarray()[0, :]
+            y = self.one_hot_encoder(y)[0, :]
 
         return {"sound": X, "class": y, "class_label": label_name}
 

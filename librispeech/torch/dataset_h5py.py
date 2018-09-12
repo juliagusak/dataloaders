@@ -4,12 +4,12 @@ import numpy as np
 
 from torch.utils import data
 
-from librispeech.basic_reader import LibriSpeechBasic
+from mics.basic_dataset import BasicDataset
 from mics.utils import LabelsToOneHot, LabelsEncoder
-from librispeech.h5py_torch.utils import SPEAKER, SOUND, CHAPTER, UTTERANCE
+from librispeech.torch.utils import SPEAKER, SOUND, CHAPTER, UTTERANCE
 
 
-class LibriSpeechH5py(LibriSpeechBasic):
+class H5PyDataset(BasicDataset):
     def __init__(self,
                  dataset_path,
                  transforms,
@@ -22,8 +22,8 @@ class LibriSpeechH5py(LibriSpeechBasic):
                  one_hot_utterance=False,
                  encode_cat=False,
                  in_memory=True):
-        super(LibriSpeechH5py, self).__init__(transforms, sr, signal_length, precision,
-                                              one_hot_all, encode_cat, in_memory)
+        super(H5PyDataset, self).__init__(transforms, sr, signal_length, precision,
+                                          one_hot_all, encode_cat, in_memory)
 
         self.hpy_file = None
         f = h5py.File(dataset_path, 'r')
@@ -69,23 +69,42 @@ class LibriSpeechH5py(LibriSpeechBasic):
         else:
             self.utterance_one_hot = None
 
-    def get_speaker_encode(self):
-        return self.speaker_encode
+    def instance_dataset(self, dataset_path, transforms, in_memory):
+        new_dataset = H5PyDataset(dataset_path,
+                                  transforms,
+                                  sr=self.sr,
+                                  signal_length=self.signal_length,
+                                  precision=self.precision,
+                                  one_hot_all=False,
+                                  one_hot_speaker=False,
+                                  one_hot_chapter=False,
+                                  one_hot_utterance=False,
+                                  encode_cat=False,
+                                  in_memory=in_memory
+                                  )
 
-    def get_chapter_encode(self):
-        return self.chapter_encode
+        new_dataset.one_hot_all = self.one_hot_all
 
-    def get_utterance_encode(self):
-        return self.utterance_encode
+        if self.one_hot_speaker or self.one_hot_all:
+            new_dataset.one_hot_speaker = True
+            new_dataset.pitch_one_hot = self.speaker_one_hot
+        if self.one_hot_chapter or self.one_hot_all:
+            new_dataset.one_hot_chapter = True
+            new_dataset.chapter_one_hot = self.chapter_one_hot
+        if self.one_hot_utterance or self.one_hot_all:
+            new_dataset.one_hot_utterance = True
+            new_dataset.utterance_one_hot = self.utterance_one_hot
 
-    def get_speaker_one_hot(self):
-        return self.speaker_one_hot
+        if self.encode_cat:
+            new_dataset.speaker_encode = self.speaker_encode
+            new_dataset.chapter_encode = self.chapter_encode
+            new_dataset.utterance_encode = self.utterance_encode
 
-    def get_chapter_one_hot(self):
-        return self.chapter_one_hot
+            new_dataset.speaker = self.speaker_encode(new_dataset.speaker)
+            new_dataset.chapter = self.chapter_encode(new_dataset.chapter)
+            new_dataset.utterance = self.utterance_encode(new_dataset.utterance)
 
-    def get_utterance_one_hot(self):
-        return self.utterance_one_hot
+        return new_dataset
 
     def __exit__(self, exc_type, exc_value, traceback):
         if self.hpy_file is not None:
@@ -110,13 +129,15 @@ if __name__ == "__main__":
     from mics.transforms import get_train_transform
 
     train_transforms = get_train_transform(length=2 ** 14)
-    dataset = LibriSpeechH5py("./librispeach/train-clean-100.hdf5",
-                              transforms=train_transforms,
-                              sr=16000,
-                              one_hot_utterance=True,
-                              in_memory=False)
+    dataset = H5PyDataset("../librispeach/train-clean-100.hdf5",
+                          transforms=train_transforms,
+                          sr=16000,
+                          one_hot_utterance=True,
+                          in_memory=False)
     print("Dataset Len", len(dataset))
     print("item 0", dataset[0])
+
+    dataset = dataset.instance_dataset("../librispeach/train-clean-100.hdf5", train_transforms, True)
 
     params = {'batch_size': 64,
               'shuffle': True,
