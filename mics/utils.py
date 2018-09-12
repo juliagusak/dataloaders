@@ -21,7 +21,7 @@ class LabelsToOneHot:
         self.one_hot_encoder.fit(self.labels_encoder.transform(data.reshape(-1, )).reshape((-1, 1)))
 
     def __call__(self, data):
-        return self.one_hot_encoder.transform(self.labels_encoder.transform(data.reshape(-1, )).reshape((-1, 1)))
+        return self.one_hot_encoder.transform(self.labels_encoder.transform(data.reshape(-1, )).reshape((-1, 1))).toarray()
 
 
 class LabelsEncoder:

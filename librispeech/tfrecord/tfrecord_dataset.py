@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from librispeech.basic_reader import LibriSpeechBasic
+from mics.basic_dataset import BasicDataset
 from mics.utils import LabelsToOneHot, LabelsEncoder
 
 
@@ -23,7 +23,7 @@ def _extract_features(example):
     return sound, sr, speaker, label
 
 
-class LibriSpeechTFRecord(LibriSpeechBasic):
+class TFRecordDataset(BasicDataset):
     def __init__(self,
                  dataset_path,
                  transforms,
@@ -38,8 +38,8 @@ class LibriSpeechTFRecord(LibriSpeechBasic):
                  batch_size=1,
                  repeat=1,
                  buffer_size=10):
-        super(LibriSpeechTFRecord, self).__init__(transforms, sr, signal_length, precision,
-                                                  one_hot_all, encode_cat, in_memory)
+        super(TFRecordDataset, self).__init__(transforms, sr, signal_length, precision,
+                                              one_hot_all, encode_cat, in_memory)
 
         self.sound = []
         self.speaker = []
@@ -163,8 +163,8 @@ class LibriSpeechTFRecord(LibriSpeechBasic):
 if __name__ == "__main__":
     from mics.transforms import get_train_transform
 
-    dataset = LibriSpeechTFRecord("../librispeach/test-clean-100_wav16.tfrecord",
-                                  get_train_transform(16000), 16000, in_memory=False, encode_cat=True)
+    dataset = TFRecordDataset("../librispeach/test-clean-100_wav16.tfrecord",
+                              get_train_transform(16000), 16000, in_memory=False, encode_cat=True)
     print(dataset[3]['sound'].shape)
     print(len(dataset))
     i = 0

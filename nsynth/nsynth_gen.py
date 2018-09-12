@@ -7,20 +7,7 @@ import os
 import numpy as np
 import tensorflow as tf
 
-NSYNTH_TRAIN = "http://download.magenta.tensorflow.org/datasets/nsynth/nsynth-train.tfrecord"
-NSYNTH_TEST = "http://download.magenta.tensorflow.org/datasets/nsynth/nsynth-test.tfrecord"
-NSYNTH_VAL = "http://download.magenta.tensorflow.org/datasets/nsynth/nsynth-valid.tfrecord"
-
-TRAIN_FILE = NSYNTH_TRAIN.split("/")[-1]
-TEST_FILE = NSYNTH_TEST.split("/")[-1]
-VAL_FILE = NSYNTH_VAL.split("/")[-1]
-
-TRAIN_EXAMPLES = 289205
-VAL_EXAMPLES = 12678
-TEST_EXAMPLES = 4096
-
-AUDIO_LEN = 64000
-QUALITIES_LEN = 10
+from nsynth.constants import *
 
 
 def parse_args():
@@ -53,23 +40,23 @@ def download_dataset(url, path, force_download):
 
 def _extract_features(example):
     features = {
-        "note_str": tf.FixedLenFeature([], dtype=tf.string),
-        "pitch": tf.FixedLenFeature([1], dtype=tf.int64),
-        "velocity": tf.FixedLenFeature([1], dtype=tf.int64),
-        "audio": tf.FixedLenFeature([64000], dtype=tf.float32),
-        "qualities": tf.FixedLenFeature([10], dtype=tf.int64),
-        "instrument_source": tf.FixedLenFeature([1], dtype=tf.int64),
-        "instrument_family": tf.FixedLenFeature([1], dtype=tf.int64),
+        NOTE_STR: tf.FixedLenFeature([], dtype=tf.string),
+        PITCH: tf.FixedLenFeature([1], dtype=tf.int64),
+        VELOCITY: tf.FixedLenFeature([1], dtype=tf.int64),
+        AUDIO: tf.FixedLenFeature([64000], dtype=tf.float32),
+        QUALITIES: tf.FixedLenFeature([10], dtype=tf.int64),
+        INSTR_SRC: tf.FixedLenFeature([1], dtype=tf.int64),
+        INSTR_FAMILY: tf.FixedLenFeature([1], dtype=tf.int64),
     }
 
     parsed_example = tf.parse_single_example(example, features)
 
-    audio = tf.reshape(tf.cast(parsed_example["audio"], tf.float32), [1, 64000])
-    pitch = tf.cast(parsed_example["pitch"], tf.int64)
-    velocity = tf.cast(parsed_example["velocity"], tf.int64)
-    instrument_source = tf.cast(parsed_example["instrument_source"], tf.int64)
-    instrument_family = tf.cast(parsed_example["instrument_family"], tf.int64)
-    qualities = tf.reshape(tf.cast(parsed_example["qualities"], tf.int64), [1, 10])
+    audio = tf.reshape(tf.cast(parsed_example[AUDIO], tf.float32), [1, 64000])
+    pitch = tf.cast(parsed_example[PITCH], tf.int64)
+    velocity = tf.cast(parsed_example[VELOCITY], tf.int64)
+    instrument_source = tf.cast(parsed_example[INSTR_SRC], tf.int64)
+    instrument_family = tf.cast(parsed_example[INSTR_FAMILY], tf.int64)
+    qualities = tf.reshape(tf.cast(parsed_example[QUALITIES], tf.int64), [1, 10])
     return audio, pitch, velocity, instrument_source, instrument_family, qualities
 
 
@@ -117,12 +104,12 @@ if __name__ == "__main__":
             f = h5py.File(dataset_path, 'w')
 
             dt = h5py.special_dtype(vlen=np.float32)
-            audio_ds = f.create_dataset("audio", (num_examples, AUDIO_LEN), dtype=np.float32)
-            pitch_ds = f.create_dataset("pitch", (num_examples,), dtype=np.int)
-            velocity_ds = f.create_dataset("velocity", (num_examples,), dtype=np.int)
-            instr_src_ds = f.create_dataset("instrument_source", (num_examples,), dtype=np.int)
-            instr_fml_ds = f.create_dataset("instrument_family", (num_examples,), dtype=np.int)
-            qualities_ds = f.create_dataset("qualities", (num_examples, QUALITIES_LEN), dtype=np.int)
+            audio_ds = f.create_dataset(AUDIO, (num_examples, AUDIO_LEN), dtype=np.float32)
+            pitch_ds = f.create_dataset(PITCH, (num_examples,), dtype=np.int)
+            velocity_ds = f.create_dataset(VELOCITY, (num_examples,), dtype=np.int)
+            instr_src_ds = f.create_dataset(INSTR_SRC, (num_examples,), dtype=np.int)
+            instr_fml_ds = f.create_dataset(INSTR_FAMILY, (num_examples,), dtype=np.int)
+            qualities_ds = f.create_dataset(QUALITIES, (num_examples, QUALITIES_LEN), dtype=np.int)
 
             idx = 0
             for audio, pitch, velocity, instrument_source, instrument_family, qualities in itarate_over_tfrecord(iter):

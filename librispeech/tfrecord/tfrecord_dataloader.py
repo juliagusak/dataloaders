@@ -48,14 +48,14 @@ class LibriSpeechTFRecordTestDataLoader(DataLoader):
 
 if __name__ == "__main__":
     from mics.transforms import get_train_transform, get_test_transform
-    from librispeech.tfrecord.tfrecord_dataset import LibriSpeechTFRecord
+    from librispeech.tfrecord.tfrecord_dataset import TFRecordDataset
 
     params = {'batch_size': 64,
               'shuffle': False,
               'num_workers': 1}
 
-    dataset = LibriSpeechTFRecord("../librispeach/test-clean-100_wav16.tfrecord",
-                                  get_train_transform(16000), 16000, in_memory=False)
+    dataset = TFRecordDataset("../librispeach/test-clean-100_wav16.tfrecord",
+                              get_train_transform(16000), 16000, in_memory=False)
     test_generator = LibriSpeechTFRecordDataLoader(dataset, **params)
     for batch in test_generator:
         print(batch['sound'].shape)
@@ -66,8 +66,8 @@ if __name__ == "__main__":
               'shuffle': False,
               'num_workers': 1}
 
-    dataset = LibriSpeechTFRecord("../librispeach/test-clean-100_wav16.tfrecord",
-                                  get_test_transform(16000), 16000, in_memory=False)
+    dataset = TFRecordDataset("../librispeach/test-clean-100_wav16.tfrecord",
+                              get_test_transform(16000), 16000, in_memory=False)
     test_generator = LibriSpeechTFRecordTestDataLoader(dataset, **params)
     for batch in test_generator:
         print(batch['sound'].shape)

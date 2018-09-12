@@ -15,14 +15,14 @@ class ValidationDataLoader(DataLoader):
 
 if __name__ == "__main__":
     from mics.transforms import get_test_transform
-    from librispeech.h5py_torch.h5py_dataset import LibriSpeechH5py
+    from librispeech.torch.dataset_h5py import H5PyDataset
 
     test_transforms = get_test_transform(length=2 ** 14)
-    test_dataset = LibriSpeechH5py("./librispeach/train-clean-100.hdf5",
-                                   transforms=test_transforms,
-                                   sr=16000,
-                                   one_hot_utterance=True,
-                                   in_memory=False)
+    test_dataset = H5PyDataset("./librispeach/train-clean-100.hdf5",
+                               transforms=test_transforms,
+                               sr=16000,
+                               one_hot_utterance=True,
+                               in_memory=False)
     params = {'batch_size': 64,
               'shuffle': True,
               'num_workers': 1}
