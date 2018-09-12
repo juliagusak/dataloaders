@@ -19,6 +19,9 @@ TRAIN_EXAMPLES = 289205
 VAL_EXAMPLES = 12678
 TEST_EXAMPLES = 4096
 
+AUDIO_LEN = 64000
+QUALITIES_LEN = 10
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='NSynth')
@@ -31,6 +34,7 @@ def parse_args():
     parser.add_argument('--force_download', action='store_true', help="Force downloading from website.")
     parser.add_argument('--force_h5py', action='store_true', help="Force creating h5py file.")
     parser.add_argument('--store_h5py', action='store_true', help="Forcing storing to h5py_utils")
+    parser.add_argument('--batch_size', default=256, type=int, help="How many items read from tfrecord at once")
 
     return parser.parse_args()
 
@@ -92,10 +96,6 @@ if __name__ == "__main__":
         download_dataset(NSYNTH_VAL, opt.path, opt.force_download)
         process_files.append((os.path.join(opt.path, VAL_FILE), VAL_EXAMPLES))
 
-    data_len = 0
-    sound_len = 64000
-    qualities_len = 10
-    batch_size = 256
     if opt.store_h5py:
         for file_name, num_examples in process_files:
             dataset_path = file_name[:-9] + ".hdf5"
@@ -109,7 +109,7 @@ if __name__ == "__main__":
 
             dataset = tf.data.TFRecordDataset(file_name)
             dataset = dataset.map(_extract_features)
-            dataset = dataset.batch(batch_size)
+            dataset = dataset.batch(opt.batch_size)
             dataset = dataset.repeat(1)
 
             iter = dataset.make_one_shot_iterator()
@@ -117,12 +117,12 @@ if __name__ == "__main__":
             f = h5py.File(dataset_path, 'w')
 
             dt = h5py.special_dtype(vlen=np.float32)
-            audio_ds = f.create_dataset("audio", (num_examples, sound_len), dtype=np.float32)
+            audio_ds = f.create_dataset("audio", (num_examples, AUDIO_LEN), dtype=np.float32)
             pitch_ds = f.create_dataset("pitch", (num_examples,), dtype=np.int)
             velocity_ds = f.create_dataset("velocity", (num_examples,), dtype=np.int)
             instr_src_ds = f.create_dataset("instrument_source", (num_examples,), dtype=np.int)
             instr_fml_ds = f.create_dataset("instrument_family", (num_examples,), dtype=np.int)
-            qualities_ds = f.create_dataset("qualities", (num_examples, qualities_len), dtype=np.int)
+            qualities_ds = f.create_dataset("qualities", (num_examples, QUALITIES_LEN), dtype=np.int)
 
             idx = 0
             for audio, pitch, velocity, instrument_source, instrument_family, qualities in itarate_over_tfrecord(iter):
@@ -136,6 +136,6 @@ if __name__ == "__main__":
                 velocity_ds[start:end] = velocity.reshape((-1))
                 instr_src_ds[start:end] = instrument_source.reshape((-1))
                 instr_fml_ds[start:end] = instrument_family.reshape((-1))
-                qualities_ds[start:end, :] = qualities.reshape((-1, qualities_len))
+                qualities_ds[start:end, :] = qualities.reshape((-1, QUALITIES_LEN))
             f.close()
             print("Complete converting: {} to {}".format(file_name, dataset_path))
