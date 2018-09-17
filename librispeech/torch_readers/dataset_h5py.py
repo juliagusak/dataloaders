@@ -6,7 +6,7 @@ from torch.utils import data
 
 from mics.basic_dataset import BasicDataset
 from mics.utils import LabelsToOneHot, LabelsEncoder
-from librispeech.torch_readers.utils import SPEAKER, SOUND, CHAPTER, UTTERANCE
+from librispeech.torch_readers.constants import SPEAKER, SOUND, CHAPTER, UTTERANCE
 
 
 class H5PyDataset(BasicDataset):
@@ -70,18 +70,18 @@ class H5PyDataset(BasicDataset):
             self.utterance_one_hot = None
 
     def instance_dataset(self, dataset_path, transforms, in_memory):
-        new_dataset = H5PyDataset(dataset_path,
-                                  transforms,
-                                  sr=self.sr,
-                                  signal_length=self.signal_length,
-                                  precision=self.precision,
-                                  one_hot_all=False,
-                                  one_hot_speaker=False,
-                                  one_hot_chapter=False,
-                                  one_hot_utterance=False,
-                                  encode_cat=False,
-                                  in_memory=in_memory
-                                  )
+        new_dataset = self.__class__(dataset_path,
+                                     transforms,
+                                     sr=self.sr,
+                                     signal_length=self.signal_length,
+                                     precision=self.precision,
+                                     one_hot_all=False,
+                                     one_hot_speaker=False,
+                                     one_hot_chapter=False,
+                                     one_hot_utterance=False,
+                                     encode_cat=False,
+                                     in_memory=in_memory
+                                     )
 
         new_dataset.one_hot_all = self.one_hot_all
 
@@ -100,10 +100,6 @@ class H5PyDataset(BasicDataset):
             new_dataset.chapter_encode = self.chapter_encode
             new_dataset.utterance_encode = self.utterance_encode
 
-            new_dataset.speaker = self.speaker_encode(new_dataset.speaker)
-            new_dataset.chapter = self.chapter_encode(new_dataset.chapter)
-            new_dataset.utterance = self.utterance_encode(new_dataset.utterance)
-
         return new_dataset
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -115,14 +111,19 @@ class H5PyDataset(BasicDataset):
                                              self.chapter[index], self.utterance[index]
         sound = self.do_transform(sound)
 
-        if self.one_hot_speaker or self.one_hot_all:
-            speaker = self.do_one_hot(speaker, self.speaker_one_hot)
-        if self.one_hot_chapter or self.one_hot_all:
-            chapter = self.do_one_hot(chapter, self.chapter_one_hot)
-        if self.one_hot_utterance or self.one_hot_all:
-            utterance = self.do_one_hot(utterance, self.utterance_one_hot)
+        if self.encode_cat:
+            speaker = self.speaker_encode(speaker)
+            chapter = self.chapter_encode(chapter)
+            utterance = self.utterance_encode(utterance)
 
-        return {"sound": sound, "speaker": speaker, "chapter": chapter, 'utterance': utterance}
+        if self.one_hot_speaker or self.one_hot_all:
+            speaker = self.speaker_one_hot(speaker)
+        if self.one_hot_chapter or self.one_hot_all:
+            chapter = self.chapter_one_hot(chapter)
+        if self.one_hot_utterance or self.one_hot_all:
+            utterance = self.utterance_one_hot(utterance)
+
+        return {SOUND: sound, SPEAKER: speaker, CHAPTER: chapter, UTTERANCE: utterance}
 
 
 if __name__ == "__main__":
@@ -137,7 +138,7 @@ if __name__ == "__main__":
     print("Dataset Len", len(dataset))
     print("item 0", dataset[0])
 
-    dataset = dataset.instance_dataset("../librispeach/train-clean-100.hdf5", train_transforms, True)
+    dataset = dataset.instance_dataset("../librispeach/train-clean-100.hdf5", train_transforms, False)
 
     params = {'batch_size': 64,
               'shuffle': True,
