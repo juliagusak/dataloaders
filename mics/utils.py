@@ -34,11 +34,20 @@ class LabelsEncoder:
         return self.labels_encoder.transform(data.reshape(-1, ))
 
 
+def configure_tf_dataset(features_extractor, batch_size, buffer_size, dataset_path, repeat):
+        dataset = tf.data.TFRecordDataset(dataset_path)
+        dataset = dataset.map(features_extractor)
+        dataset = dataset.batch(batch_size)
+        dataset = dataset.shuffle(buffer_size=buffer_size)
+        return dataset.repeat(repeat)
+
+
 def itarate_over_tfrecord(iter):
+    iter = iter.get_next()
     with tf.Session() as sess:
         try:
             while True:
-                yield sess.run(iter.get_next())
+                yield sess.run(iter)
         except tf.errors.OutOfRangeError:
             pass
 

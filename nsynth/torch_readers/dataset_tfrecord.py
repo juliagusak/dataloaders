@@ -1,9 +1,11 @@
 import numpy as np
-from mics.basic_dataset import BasicDataset
-from mics.utils import LabelsToOneHot, LabelsEncoder
+
+from mics import configure_tf_dataset, itarate_over_tfrecord
+from nsynth.torch_readers.basic_dataset import NSynthBasicDataset
+from nsynth.utils import *
 
 
-class NSynthTFRecordDataset(BasicDataset):
+class NSynthTFRecordDataset(NSynthBasicDataset):
     def __init__(self,
                  dataset_path,
                  transforms,
@@ -16,59 +18,89 @@ class NSynthTFRecordDataset(BasicDataset):
                  one_hot_instr_src=False,
                  one_hot_instr_family=False,
                  encode_cat=False,
-                 in_memory=True):
-        super(NSynthTFRecordDataset, self).__init__(transforms, sr, signal_length, precision,
-                                                one_hot_all, encode_cat, in_memory)
-        self.one_hot_pitch = one_hot_pitch
-        self.one_hot_velocity = one_hot_velocity
-        self.one_hot_instr_src = one_hot_instr_src
-        self.one_hot_instr_family = one_hot_instr_family
+                 in_memory=True,
+                 batch_size=1,
+                 repeat=1,
+                 buffer_size=10):
+        # self.sess = tf.Session()
+        self.sess = None
+        self.iterator = None
 
-        # self.hpy_file = None
-        #
-        # f = h5py.File(dataset_path, 'r')
-        # self.pitch = f[PITCH][:]
-        # self.velocity = f[VELOCITY][:]
-        # self.instr_src = f[INSTR_SRC][:]
-        # self.instr_fml = f[INSTR_FAMILY][:]
-        # self.qualities = f[QUALITIES][:]
-        #
-        # if self.in_memory:
-        #     self.audio = f[AUDIO][:]
-        #     f.close()
-        # else:
-        #     self.hpy_file = f
-        #     self.sound = f[AUDIO]
+        self.dataset = configure_tf_dataset(nsynth_extract_features, batch_size, buffer_size, dataset_path, repeat)
 
-        self.n = self.pitch.shape[0]
+        super(NSynthTFRecordDataset, self).__init__(dataset_path,
+                                                    transforms,
+                                                    sr,
+                                                    signal_length=signal_length,
+                                                    precision=precision,
+                                                    one_hot_all=one_hot_all,
+                                                    one_hot_pitch=one_hot_pitch,
+                                                    one_hot_velocity=one_hot_velocity,
+                                                    one_hot_instr_src=one_hot_instr_src,
+                                                    one_hot_instr_family=one_hot_instr_family,
+                                                    encode_cat=encode_cat,
+                                                    in_memory=in_memory)
 
-        if self.encode_cat:
-            self.pitch_encoder = LabelsEncoder(self.pitch)
-            self.velocity_encoder = LabelsEncoder(self.velocity)
-            self.instr_src_encoder = LabelsEncoder(self.instr_src)
-            self.instr_fml_encoder = LabelsEncoder(self.instr_fml)
+    def read_file(self, dataset_path):
+        iter = self.dataset.make_one_shot_iterator()
+        self.n = 0
+        for audio, pitch, velocity, instrument_source, instrument_family, qualities in itarate_over_tfrecord(iter):
+            if not self.in_memory:
+                self.audio.append(audio)
+            self.n += 1
+            self.pitch.append(pitch)
+            self.velocity.append(velocity)
+            self.instr_src.append(instrument_source)
+            self.instr_fml.append(instrument_family)
+            self.qualities.append(qualities)
 
-            self.pitch = self.pitch_encoder(self.pitch)
-            self.velocity = self.velocity_encoder(self.velocity)
-            self.instr_src = self.instr_src_encoder(self.instr_src)
-            self.instr_fml = self.instr_fml_encoder(self.instr_fml)
+        self.audio = np.array(self.audio)
+        self.pitch = np.array(self.pitch)
+        self.velocity = np.array(self.velocity)
+        self.instr_src = np.array(self.instr_src)
+        self.instr_fml = np.array(self.instr_fml)
+        self.qualities = np.array(self.qualities)
 
-        if self.one_hot_pitch or self.one_hot_all:
-            self.pitch_one_hot = LabelsToOneHot(self.pitch)
+        if not self.in_memory:
+            self.sess = tf.Session()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.sess is not None:
+            self.sess.close()
+
+    def read_elem(self, index):
+        if self.in_memory:
+            audio, pitch, velocity = self.audio[index], self.pitch[index], self.velocity[index]
+            instrument_source, instrument_family = self.instr_src[index], self.instr_fml[index]
+            qualities = self.qualities[index]
         else:
-            self.pitch_one_hot = None
+            if self.iterator is None:
+                self.iterator = self.dataset.make_one_shot_iterator()
+            try:
+                audio, pitch, velocity, instrument_source, instrument_family, qualities = self.sess.run(
+                    self.iterator.get_next())
+            except tf.errors.OutOfRangeError:
+                self.iterator = self.dataset.make_one_shot_iterator()
+                audio, pitch, velocity, instrument_source, instrument_family, qualities = self.sess.run(
+                    self.iterator.get_next())
 
-        if self.one_hot_velocity or self.one_hot_all:
-            self.velocity_one_hot = LabelsToOneHot(self.velocity)
-        else:
-            self.velocity_one_hot = None
+        return audio, pitch, velocity, instrument_source, instrument_family, qualities
 
-        if self.one_hot_instr_src or self.one_hot_all:
-            self.instr_src_one_hot = LabelsToOneHot(self.instr_src)
-        else:
-            self.instr_src_one_hot = None
 
-        if self.one_hot_instr_family or self.one_hot_all:
-            self.instr_fml_one_hot = LabelsToOneHot(self.instr_fml)
-        else:
-            self.instr_fml_one_hot = None
+if __name__ == "__main__":
+    from mics.transforms import get_train_transform
+
+    train_transforms = get_train_transform(length=2 ** 14)
+    dataset = NSynthTFRecordDataset("../nsynth-test.tfrecord",
+                                    one_hot_pitch=True,
+                                    encode_cat=True,
+                                    transforms=train_transforms,
+                                    sr=16000,
+                                    in_memory=False)
+    print("Dataset Len", len(dataset))
+    print("item 0", dataset[0])
+
+    dataset = dataset.instance_dataset("../nsynth-test.tfrecord", train_transforms, False)
+
+    print("Dataset Len", len(dataset))
+    print("item 0", dataset[0])

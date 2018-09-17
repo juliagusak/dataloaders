@@ -32,9 +32,6 @@ class BasicDataset(data.Dataset):
 
         return sound
 
-    def do_one_hot(self, id, encoder):
-        return encoder(np.array([id]).reshape((-1, 1)))[0, :]
-
     def __len__(self):
         return self.n
 

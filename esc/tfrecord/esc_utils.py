@@ -28,6 +28,7 @@ def normalize(factor):
 
     return f
 
+
 # For strong data augmentation
 # Scale audio signal (compress/decompress in time domain)
 # For augmentation use scale from [0.8, 1.25]
@@ -61,18 +62,18 @@ def random_gain(db):
 
 
 def preprocess_sound(sound):
-    sound = padding(INPUT_LENGTH//2)(sound)
+    sound = padding(INPUT_LENGTH // 2)(sound)
     sound = random_crop(INPUT_LENGTH)(sound)
     sound = normalize(FACTOR)(sound)
-    
+
     return sound.astype(np.float32)
 
 
-def augment_sound(sound, strong = True):
+def augment_sound(sound, strong=True):
     sound = random_scale(1.25)(sound)
     sound = preprocess_sound(sound)
-    
+
     if strong:
         sound = random_gain(6)(sound)
-        
+
     return sound.astype(np.float32)

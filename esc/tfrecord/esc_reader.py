@@ -8,6 +8,7 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
+
 class ESCDataset(object):
     '''Dataset object to help manage the TFRecord loading.'''
     
