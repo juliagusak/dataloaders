@@ -3,7 +3,8 @@ import glob
 import os
 import subprocess
 from random import shuffle
-
+import zipfile
+import io
 import librosa
 import numpy as np
 
@@ -39,11 +40,20 @@ def parse_args():
     return parser.parse_args()
 
 
-def save_npz(X, y, z, save_to):
+def save_npz(X, y, z, save_to,compress=False):
     data = {"X": X, "y": y, "label_name": z}
-    np.savez(save_to, **data)
-
-
+    if compress:
+        compression = zipfile.ZIP_DEFLATED
+    else:
+        compression = zipfile.ZIP_STORED
+    with zipfile.ZipFile(save_to, mode="w", compression=compression, allowZip64=True) as zf:
+            for key, value in data.items():
+                buffer = io.BytesIO()
+                np.lib.npyio.format.write_array(buffer,
+                                             np.asanyarray(value),
+                                             allow_pickle=True)
+                zf.writestr(key + '.npy', buffer.getvalue())
+                
 def read_file(file_name, sr, verbose=0):
     if verbose:
         print("Read file:", file_name)
