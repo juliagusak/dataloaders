@@ -3,8 +3,8 @@ import numpy as np
 
 from torch.utils import data
 
-from mics.transforms import get_train_transform, get_test_transform
-from mics.utils import FEATURES, LABEL, numpy_one_hot, mix, tensor_to_numpy
+from misc.transforms import get_train_transform, get_test_transform
+from misc.utils import FEATURES, LABEL, numpy_one_hot, mix, tensor_to_numpy
 
 
 class ESCDatasets(data.Dataset):

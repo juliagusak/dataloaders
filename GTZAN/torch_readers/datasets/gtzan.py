@@ -4,8 +4,8 @@ import librosa
 import numpy as np
 from tqdm import tqdm
 from joblib import Parallel, delayed
-from mics.transforms import get_train_transform, get_test_transform
-from mics.utils import FEATURES, LABEL, tensor_to_numpy, LabelsToOneHot
+from misc.transforms import get_train_transform, get_test_transform
+from misc.utils import FEATURES, LABEL, tensor_to_numpy, LabelsToOneHot
 
 
 class GTZAN(data.Dataset):

@@ -4,8 +4,8 @@ import numpy as np
 
 from torch.utils import data
 
-from mics.basic_dataset import BasicDataset
-from mics.utils import LabelsToOneHot, LabelsEncoder
+from misc.basic_dataset import BasicDataset
+from misc.utils import LabelsToOneHot, LabelsEncoder
 from librispeech.torch_readers.constants import SPEAKER, SOUND, CHAPTER, UTTERANCE
 
 
@@ -127,7 +127,7 @@ class H5PyDataset(BasicDataset):
 
 
 if __name__ == "__main__":
-    from mics.transforms import get_train_transform
+    from misc.transforms import get_train_transform
 
     train_transforms = get_train_transform(length=2 ** 14)
     dataset = H5PyDataset("../librispeach/train-clean-100.hdf5",

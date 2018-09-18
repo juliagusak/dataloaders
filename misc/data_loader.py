@@ -14,7 +14,7 @@ class ValidationDataLoader(DataLoader):
 
 
 if __name__ == "__main__":
-    from mics.transforms import get_test_transform
+    from misc.transforms import get_test_transform
     from librispeech.torch_readers.dataset_h5py import H5PyDataset
 
     test_transforms = get_test_transform(length=2 ** 14)

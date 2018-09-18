@@ -2,8 +2,8 @@ from abc import abstractmethod
 
 import numpy as np
 
-from mics.basic_dataset import BasicDataset
-from mics.utils import LabelsEncoder, LabelsToOneHot
+from misc.basic_dataset import BasicDataset
+from misc.utils import LabelsEncoder, LabelsToOneHot
 from nsynth.constants import *
 
 

@@ -10,7 +10,7 @@ import numpy as np
 from joblib import Parallel, delayed
 from sklearn.model_selection import train_test_split
 
-from mics.utils import LabelsEncoder
+from misc.utils import LabelsEncoder
 
 GTZAN_SPEECH_URL = "http://opihi.cs.uvic.ca/sound/genres.tar.gz"
 DEFAULT_BIT_RATE = 22050

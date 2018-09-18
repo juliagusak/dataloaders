@@ -61,7 +61,7 @@ class NSynthH5PyDataset(NSynthBasicDataset):
 
 
 if __name__ == "__main__":
-    from mics.transforms import get_train_transform
+    from misc.transforms import get_train_transform
     from torch.utils import data
 
     train_transforms = get_train_transform(length=2 ** 14)

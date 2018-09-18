@@ -1,9 +1,9 @@
 import numpy as np
 from torch.utils import data
 
-from mics.data_loader import ValidationDataLoader
-from mics.transforms import get_train_transform, get_test_transform
-from mics.utils import LabelsToOneHot, tensor_to_numpy
+from misc.data_loader import ValidationDataLoader
+from misc.transforms import get_train_transform, get_test_transform
+from misc.utils import LabelsToOneHot, tensor_to_numpy
 
 
 class GTANZDataset(data.Dataset):

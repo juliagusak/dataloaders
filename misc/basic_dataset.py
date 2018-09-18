@@ -2,7 +2,7 @@ import numpy as np
 
 from torch.utils import data
 
-from mics.utils import tensor_to_numpy
+from misc.utils import tensor_to_numpy
 
 
 class BasicDataset(data.Dataset):

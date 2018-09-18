@@ -2,8 +2,8 @@ import numpy as np
 import tensorflow as tf
 
 from librispeech.torch_readers.constants import *
-from mics.basic_dataset import BasicDataset
-from mics.utils import LabelsToOneHot, LabelsEncoder, itarate_over_tfrecord, configure_tf_dataset
+from misc.basic_dataset import BasicDataset
+from misc.utils import LabelsToOneHot, LabelsEncoder, itarate_over_tfrecord, configure_tf_dataset
 
 
 def librispeech_features(example):
@@ -165,7 +165,7 @@ class TFRecordDataset(BasicDataset):
 
 
 if __name__ == "__main__":
-    from mics.transforms import get_train_transform
+    from misc.transforms import get_train_transform
 
     train_transforms = get_train_transform(16000)
     dataset = TFRecordDataset("../librispeach/test-clean-100_wav16.tfrecord",

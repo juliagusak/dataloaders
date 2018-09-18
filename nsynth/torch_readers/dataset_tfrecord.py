@@ -1,6 +1,6 @@
 import numpy as np
 
-from mics import configure_tf_dataset, itarate_over_tfrecord
+from misc import configure_tf_dataset, itarate_over_tfrecord
 from nsynth.torch_readers.basic_dataset import NSynthBasicDataset
 from nsynth.utils import *
 
@@ -88,7 +88,7 @@ class NSynthTFRecordDataset(NSynthBasicDataset):
 
 
 if __name__ == "__main__":
-    from mics.transforms import get_train_transform
+    from misc.transforms import get_train_transform
 
     train_transforms = get_train_transform(length=2 ** 14)
     dataset = NSynthTFRecordDataset("../nsynth-test.tfrecord",

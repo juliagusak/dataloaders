@@ -56,7 +56,7 @@ class NSynthTFRecordTestDataLoader(DataLoader):
 
 
 if __name__ == "__main__":
-    from mics.transforms import get_train_transform, get_test_transform
+    from misc.transforms import get_train_transform, get_test_transform
 
     params = {'batch_size': 64,
               'shuffle': False,

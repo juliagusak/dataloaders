@@ -7,7 +7,7 @@ import os
 import numpy as np
 import tensorflow as tf
 
-from mics.utils import itarate_over_tfrecord
+from misc.utils import itarate_over_tfrecord
 from nsynth.constants import *
 from nsynth.utils import nsynth_extract_features
 
