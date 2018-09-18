@@ -36,4 +36,4 @@ For this scheme we've done additional DataLoaders for PyTorch:
 
   - [DataLoader for ESC, GTZAN, LibriSpeech](https://github.com/juliagusak/dataloaders/blob/master/mics/data_loader.py)
   - [DataLoader for LibriSpeech from TfRecords](https://github.com/juliagusak/dataloaders/blob/master/librispeech/tfrecord_dataloader.py)  
-
+  - [DataLoaders for NSynth](https://github.com/juliagusak/dataloaders/blob/master/librispeech/tfrecord/tfrecord_dataloader.py)
