@@ -7,6 +7,9 @@ import os
 import numpy as np
 import tensorflow as tf
 
+import sys
+sys.path.append('/workspace/jgusak/DataLoaders/')
+
 from misc.utils import itarate_over_tfrecord
 from nsynth.constants import *
 from nsynth.utils import nsynth_extract_features
@@ -42,6 +45,7 @@ def download_dataset(url, path, force_download):
 
 if __name__ == "__main__":
     opt = parse_args()
+    print(opt)
 
     process_files = []
     if opt.train:
@@ -55,7 +59,9 @@ if __name__ == "__main__":
         process_files.append((os.path.join(opt.path, VAL_FILE), VAL_EXAMPLES))
 
     if opt.store_h5py:
+        print('hey')
         for file_name, num_examples in process_files:
+            print(file_name)
             dataset_path = file_name[:-9] + ".hdf5"
 
             if opt.force_h5py and os.path.exists(dataset_path):

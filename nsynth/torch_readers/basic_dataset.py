@@ -37,6 +37,7 @@ class NSynthBasicDataset(BasicDataset):
 
         self.read_file(dataset_path)
 
+        print(self.pitch)
         self.n = self.pitch.shape[0]
 
         if self.encode_cat:

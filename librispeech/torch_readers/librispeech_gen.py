@@ -9,7 +9,8 @@ from glob import glob
 from tqdm import tqdm
 from random import shuffle
 
-from utils import UTTERANCE, CHAPTER, SPEAKER, SOUND
+#from utils import UTTERANCE, CHAPTER, SPEAKER, SOUND
+from constants import UTTERANCE, CHAPTER, SPEAKER, SOUND
 
 LIBRI_SPEECH_URL = "http://www.openslr.org/12/"
 EXTRACTED_FOLDER = "LibriSpeech"
@@ -34,7 +35,7 @@ def parse_args():
     parser.add_argument('--wav_dir', default=EXTRACTED_FOLDER+"Wav",  help="Where to store wav files")
     parser.add_argument('--rm_flac', default=True, help="Remove or not folder with flac files")
     parser.add_argument('--take_random', action='store_true',
-                        type=int, help="Take N random wav files for storing in h5py_torch")
+                         help="Take N random wav files for storing in h5py_torch")
 
     return parser.parse_args()
 
