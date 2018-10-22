@@ -47,8 +47,8 @@ def parse_args():
 
 def save_npz(X, y, z, save_to):
     data = {"X": X, "y": y, "label_name": z}
-    np.savez(save_to, **data)
-
+    #np.savez(save_to, **data)
+    np.savez_compressed(save_to, **data)
 
 def read_file(file_name, sr, verbose=0):
     if verbose:
