@@ -10,6 +10,12 @@ import numpy as np
 from joblib import Parallel, delayed
 from sklearn.model_selection import train_test_split
 
+
+# add path to the directory with misc folder
+import sys
+sys.path.append(os.path.abspath(".."))
+
+
 from misc.utils import LabelsEncoder
 
 GTZAN_SPEECH_URL = "http://opihi.cs.uvic.ca/sound/genres.tar.gz"
@@ -58,7 +64,7 @@ if __name__ == "__main__":
     extracted_path = os.path.join(opt.path, FOLDER_NAME)
     if not os.path.exists(tar_gz_path) or opt.force_download:
         if opt.force_download and os.path.exists(tar_gz_path):
-            print("Force download. {} file will me replaced.".format(tar_gz_path))
+            print("Force download. {} file will be replaced.".format(tar_gz_path))
             os.remove(tar_gz_path)
 
         print("Download *.tar.gz file to", tar_gz_path)

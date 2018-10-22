@@ -7,8 +7,9 @@ import os
 import numpy as np
 import tensorflow as tf
 
+# add path to the directory with misc folder
 import sys
-sys.path.append('/workspace/jgusak/DataLoaders/')
+sys.path.append(os.path.abspath(".."))
 
 from misc.utils import itarate_over_tfrecord
 from nsynth.constants import *
