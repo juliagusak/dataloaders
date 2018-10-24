@@ -26,6 +26,8 @@ Pytorch and TFRecords data loaders for  several audio datasets
 5. [GTZAN](http://marsyasweb.appspot.com/download/data_sets/) - audio tracks from a variety of sources annotated with genre class
   - [x] [GTZAN Downloader](https://github.com/juliagusak/dataloaders/blob/master/GTZAN/gtzan_dataset.py)
   - [x] [PyTorch DataSet](https://github.com/juliagusak/dataloaders/blob/master/GTZAN/torch/gtzan_dataset.py)
+6. [CallCenter] - audio tracks with human and non-human speech
+  - [x] [PyTorch DataSet](https://github.com/juliagusak/dataloaders/blob/master/GTZAN/torch/callcenter_dataset.py)
   
 For validation we frequently use the following scheme: 
 1. Read 10 random crops from a file;
