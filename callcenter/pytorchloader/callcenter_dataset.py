@@ -1,5 +1,6 @@
-import os
 import numpy as np
+import pandas as pd
+import librosa
 
 from torch.utils import data
 
@@ -7,12 +8,17 @@ from misc.transforms import get_train_transform, get_test_transform
 from misc.utils import FEATURES, LABEL, numpy_one_hot, mix, tensor_to_numpy
 
 
-class ESCDatasets(data.Dataset):
-    def __init__(self, data_path, dataset_name,
-                 sr, exclude,
+
+
+
+class CallCenterDataset(data.Dataset):
+    def __init__(self, data_path, csv_local_path,
+                 sr =8000, 
                  is_train=True,
-                 signal_length=2 ** 16,
-                 mix=False, precision=np.float32):
+                 signal_length=2**16,
+                 mix=False,
+                 precision=np.float32,
+                 n_files = None):
 
         self.signal_length = signal_length
 
@@ -24,26 +30,40 @@ class ESCDatasets(data.Dataset):
         self.sr = sr
         self.mix = mix
         self.precision = precision
-        data_set = np.load(os.path.join(data_path, dataset_name, 'wav{}.npz'.format(sr // 1000)))
-
+        self.n_files = n_files
+        
+        df = pd.read_csv(data_path + csv_local_path)
+        
+        if self.n_files is not None:
+            df = df.sample(self.n_files)
+            
+        
         self.X = []
         self.y = []
-        for fold_name in data_set.keys():
-            if int(fold_name[4:]) in exclude:
-                continue
-
-            sounds = data_set[fold_name].item()['sounds']
-            labels = data_set[fold_name].item()['labels']
-
-            self.X.extend(sounds)
-            self.y.extend(labels)
-
+        
+        for idx, row in df.iterrows():
+            file_name = '/'.join(['callCenterDataset', 
+                                 row['file_name'].split('callCenterDataset/')[1]])
+            file_name = '{}/{}'.format(data_path, file_name)
+            
+            v_start,v_end = row['v_start'],row['v_end']
+            
+            signal, sr = librosa.load(file_name, sr = self.sr,
+                                      res_type = 'kaiser_fast')
+            assert (len(signal[int(v_start*sr):int(v_end*sr)]) > 0)
+            
+            self.X.append(signal[int(v_start*sr):int(v_end*sr)])
+            self.y.append(int(row['is_human']))
+        
         self.n_classes = len(set(self.y))
-
+        
+        
     def __len__(self):
-        'Denotes the total number of samples'
+        '''
+        Denotes the total number of samples
+        '''
         return len(self.y)
-
+        
     def __do_transform(self, signal):
         signal = signal.astype(self.precision)
         if self.transform:
@@ -76,18 +96,7 @@ class ESCDatasets(data.Dataset):
             sample = self.__mix_samples(sample1, sample2)
 
         else:
-#             sample = {FEATURES: self.__do_transform(self.X[index]),
-#                       LABEL: self.y[index]}
             sample = {FEATURES: self.__do_transform(self.X[index]),
                       LABEL: numpy_one_hot(self.y[index], num_classes=self.n_classes)}
 
         return sample
-
-
-# if __name__ == "__main__":
-#     data_path = "/home/julia/DeepVoice_data/ESC"
-#     dataset_name = "esc10"
-#     sr = 16000
-#     exclude = [5]
-#     dataset = BCDatasets(data_path, dataset_name, sr, exclude, scattering_time_transform=False)
-#     print(dataset[0])
