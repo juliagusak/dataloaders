@@ -12,13 +12,15 @@ from misc.utils import FEATURES, LABEL, numpy_one_hot, mix, tensor_to_numpy
 
 
 class CallCenterDataset(data.Dataset):
-    def __init__(self, data_path, csv_local_path,
+    def __init__(self, data_path,
+                 csv_local_path,
                  sr =8000, 
                  is_train=True,
                  signal_length=2**16,
                  mix=False,
                  precision=np.float32,
-                 n_files = None):
+                 n_files = None,
+                 upsample_factor = 1):
 
         self.signal_length = signal_length
 
@@ -31,6 +33,7 @@ class CallCenterDataset(data.Dataset):
         self.mix = mix
         self.precision = precision
         self.n_files = n_files
+        self.upsample_factor = upsample_factor
         
         df = pd.read_csv(data_path + csv_local_path)
         
@@ -68,6 +71,8 @@ class CallCenterDataset(data.Dataset):
         signal = signal.astype(self.precision)
         if self.transform:
             signal = tensor_to_numpy(self.transform(signal.reshape((1, -1, 1))))
+            
+            signal = np.repeat(signal, repeats=self.upsample_factor, axis = -1)
 
         return signal
 
@@ -76,8 +81,8 @@ class CallCenterDataset(data.Dataset):
 
         sound1 = sample1[FEATURES].reshape((-1))
         sound2 = sample2[FEATURES].reshape((-1))
-
-        sound = mix(sound1, sound2, r, self.sr)
+        
+        sound = mix(sound1, sound2, r, self.sr*self.upsample_factor)
         label = r * sample1[LABEL] + (1.0 - r) * sample2[LABEL]
         
         sound = sound.reshape((1, 1, -1))
