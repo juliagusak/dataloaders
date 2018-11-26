@@ -4,7 +4,8 @@ import torchvision
 
 from torchvision.transforms import ToPILImage, Pad, RandomCrop, ToTensor, TenCrop, Lambda
 
-MAX_INT = 32768.0
+# MAX_INT = 32768.0
+MAX_INT = 1.0
 
 
 class Centring(object):

@@ -39,16 +39,15 @@ class CallCenterDataset(data.Dataset):
         
         if self.n_files is not None:
             df = df.sample(self.n_files)
-            
+        
+        df['file_name'] = df['file_name'].apply(lambda x: '{}/{}'.format(data_path,
+                                               '/'.join(['callCenterDataset',
+                                                         x.split('callCenterDataset/')[1]])))
         
         self.X = []
         self.y = []
         
-        for idx, row in df.iterrows():
-            file_name = '/'.join(['callCenterDataset', 
-                                 row['file_name'].split('callCenterDataset/')[1]])
-            file_name = '{}/{}'.format(data_path, file_name)
-            
+        for idx, row in df.iterrows():          
             v_start,v_end = row['v_start'],row['v_end']
             
             signal, sr = librosa.load(file_name, sr = self.sr,
