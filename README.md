@@ -10,9 +10,9 @@ Pytorch and TFRecords data loaders for  several audio datasets
 2. [LibriSpeech](http://www.openslr.org/12/) - corpus of read English speech
   - [x] [LibriSpeech downloader for PyTorch](https://github.com/juliagusak/dataloaders/blob/master/librispeech/torch_readers/librispeech_gen.py) 
   - [x] [PyTorch DataSet](https://github.com/juliagusak/dataloaders/blob/master/librispeech/torch_readers/dataset_h5py.py)
-  - [x] [PyTorch DataSet for TFRecord](https://github.com/juliagusak/dataloaders/blob/master/librispeech/tfrecord/librispeech_reader.py)
+  - [x] [PyTorch DataSet for TFRecord](https://github.com/juliagusak/dataloaders/blob/master/librispeech/torch_readers/dataloader_tfrecord.py)
   - [x] [PyTorch DataLoaders for TFRecord](https://github.com/juliagusak/dataloaders/blob/master/librispeech/torch_readers/dataloader_tfrecord.py)
-  - [x] [TFRecords Loader](https://github.com/juliagusak/dataloaders/blob/master/librispeech/tfrecord/tfrecord_reader.py)
+  - [x] [TFRecords Loader](https://github.com/juliagusak/dataloaders/blob/master/librispeech/tfrecord/librispeech_reader.py)
   - [x] [TFRecords Generator](https://github.com/juliagusak/dataloaders/blob/master/librispeech/tfrecord/librispeech_to_tfrecords.py)
 3. [NSynth](https://magenta.tensorflow.org/datasets/nsynth) - dataset of annotated musical notes
   - [x] [NSynth downloader and generator of *.h5py and *.tfrecord formats](https://github.com/juliagusak/dataloaders/blob/master/nsynth/nsynth_gen.py)
