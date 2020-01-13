@@ -36,6 +36,6 @@ For validation we frequently use the following scheme:
 
 For this scheme we've done additional DataLoaders for PyTorch:
 
-  - [DataLoader for ESC, GTZAN, LibriSpeech](https://github.com/juliagusak/dataloaders/blob/master/mics/data_loader.py)
+  - [DataLoader for ESC, GTZAN, LibriSpeech](https://github.com/juliagusak/dataloaders/blob/master/misc/data_loader.py)
   - [DataLoader for LibriSpeech from TfRecords](https://github.com/juliagusak/dataloaders/blob/master/librispeech/torch_readers/dataloader_tfrecord.py)  
   - [DataLoaders for NSynth](https://github.com/juliagusak/dataloaders/blob/master/nsynth/torch_readers/dataloader_tfrecord.py)
